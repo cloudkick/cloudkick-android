@@ -21,9 +21,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.util.Log;
+
 
 public class CloudkickAPI {
-
+	private static final String TAG = "CloudkickAPI";
     private static String API_HOST = "api.cloudkick.com";
     private static String API_VERSION = "1.0";
     private CommonsHttpOAuthConsumer consumer;
@@ -33,7 +35,6 @@ public class CloudkickAPI {
 	public CloudkickAPI(String key, String secret) {
 		consumer = new CommonsHttpOAuthConsumer(key, secret);
 		client = new DefaultHttpClient();
-
 	}
 	
 	private String doRequest(String path) {
@@ -80,6 +81,7 @@ public class CloudkickAPI {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		Log.i(TAG, "Retrieved " + nodes.length + " Nodes");
 		return nodes;
 	}
 }

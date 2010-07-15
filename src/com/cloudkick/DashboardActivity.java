@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ListView;
 
 public class DashboardActivity extends Activity {
+	private static final String TAG = "DashboardActivity";
 	private CloudkickAPI api;
 	private ProgressDialog progress;
 	private ListView dashboard;
@@ -61,6 +63,7 @@ public class DashboardActivity extends Activity {
 		}
 		
 		protected void onPostExecute(Node[] retrieved_nodes) {
+			Log.i(TAG, "Retrieved " + retrieved_nodes.length + " Nodes");
 		    adapter = new NodesAdapter(DashboardActivity.this, R.layout.node_item, retrieved_nodes);
 			dashboard.setAdapter(adapter);
 			adapter.notifyDataSetChanged();

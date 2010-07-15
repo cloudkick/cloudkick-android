@@ -27,7 +27,7 @@ public class Node {
 			providerName = obj.getString("provider_name");
 			ipAddress = obj.getString("ipaddress");
 			id = obj.getString("id");
-			agentState = obj.getString("agentState");
+			agentState = obj.getString("agent_state");
 			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

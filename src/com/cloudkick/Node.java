@@ -1,10 +1,13 @@
 package com.cloudkick;
 
+import java.io.Serializable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Node {
+public class Node implements Serializable {
+	private static final long serialVersionUID = -6829386412299389386L;
 	String name;
 	String providerID;
 	String[] tags;

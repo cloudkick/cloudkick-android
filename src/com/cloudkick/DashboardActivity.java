@@ -2,12 +2,16 @@ package com.cloudkick;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 public class DashboardActivity extends Activity {
@@ -34,8 +38,17 @@ public class DashboardActivity extends Activity {
 	    dashboard = new ListView(this);
 	    adapter = new NodesAdapter(this, R.layout.node_item, nodes);
 		dashboard.setAdapter(adapter);
+		dashboard.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Bundle data = new Bundle();
+				data.putSerializable("node", nodes[position]);
+				Intent intent = new Intent(DashboardActivity.this, NodeViewActivity.class);
+				intent.putExtras(data);
+				startActivityForResult(intent, 0);
+			}
+		});
+
 	    setContentView(dashboard);
-	    
 	    refreshNodes();
 	}
 	
@@ -65,6 +78,7 @@ public class DashboardActivity extends Activity {
 		protected void onPostExecute(Node[] retrieved_nodes) {
 			Log.i(TAG, "Retrieved " + retrieved_nodes.length + " Nodes");
 		    adapter = new NodesAdapter(DashboardActivity.this, R.layout.node_item, retrieved_nodes);
+		    nodes = retrieved_nodes;
 			dashboard.setAdapter(adapter);
 			adapter.notifyDataSetChanged();
 			progress.dismiss();

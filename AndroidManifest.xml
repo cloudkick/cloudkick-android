@@ -17,7 +17,9 @@
         </activity>
         <activity android:name=".NodeViewActivity">
         </activity>
-
-    </application>
+		<activity android:name=".Preferences">
+		</activity>
+    
+</application>
     <uses-sdk android:minSdkVersion="8" />
 </manifest> 

@@ -65,6 +65,10 @@ public class DashboardActivity extends Activity {
 		    case R.id.refresh_dashboard:
 		        refreshNodes();
 		        return true;
+		    case R.id.settings:
+		    	Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+		    	startActivity(settingsActivity);
+		    	return true;
 		    default:
 		        return super.onOptionsItemSelected(item);
 	    }

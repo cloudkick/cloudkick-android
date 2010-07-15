@@ -21,4 +21,14 @@
         android:textColor="#FF050505"
         android:layout_below="@id/node_detail_name"
     />
+    <View
+    	android:id="@+id/node_detail_hr"
+    	android:layout_width="fill_parent"
+    	android:layout_height="2dip"
+    	android:layout_marginTop="4dip"
+    	android:layout_marginBottom="4dip"
+    	android:paddingBottom="6dip"
+    	android:background="#CCCCCCCC"
+    	android:layout_below="@id/node_detail_tags"
+    />
 </RelativeLayout>

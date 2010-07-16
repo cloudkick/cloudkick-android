@@ -1,5 +1,7 @@
 package com.cloudkick;
 
+import org.json.JSONException;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -37,7 +39,6 @@ public class DashboardActivity extends Activity {
 	    super.onCreate(savedInstanceState);
 	    PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 	    prefs = PreferenceManager.getDefaultSharedPreferences(this);
-	    System.out.println(prefs.getString("editKey",""));
 	    api = new CloudkickAPI(prefs.getString("editKey", ""), prefs.getString("editSecret", ""));
 	    
 	    dashboard = new ListView(this);
@@ -68,7 +69,7 @@ public class DashboardActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    switch (item.getItemId()) {
 		    case R.id.refresh_dashboard:
-		        refreshNodes();
+		    	refreshNodes();
 		        return true;
 		    case R.id.settings:
 		    	Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
@@ -85,12 +86,19 @@ public class DashboardActivity extends Activity {
 		}
 		
 		protected void onPostExecute(Node[] retrieved_nodes) {
-			Log.i(TAG, "Retrieved " + retrieved_nodes.length + " Nodes");
-		    adapter = new NodesAdapter(DashboardActivity.this, R.layout.node_item, retrieved_nodes);
-		    nodes = retrieved_nodes;
-			dashboard.setAdapter(adapter);
-			adapter.notifyDataSetChanged();
-			progress.dismiss();
+			try {
+				Log.i(TAG, "Retrieved " + retrieved_nodes.length + " Nodes");
+				adapter = new NodesAdapter(DashboardActivity.this, R.layout.node_item, retrieved_nodes);
+				nodes = retrieved_nodes;
+				dashboard.setAdapter(adapter);
+				adapter.notifyDataSetChanged();
+				progress.dismiss();
+			}
+			catch (Exception e) {
+				progress.dismiss();
+				Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+		    	startActivity(settingsActivity);
+			}
 		}
 	}
 }

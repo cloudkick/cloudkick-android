@@ -50,20 +50,20 @@ public class CloudkickAPI {
 			    body.append(line);
 			}
 		} catch (OAuthMessageSignerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			return null;
 		} catch (OAuthExpectationFailedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			return null;
 		} catch (OAuthCommunicationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			return null;
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			return null;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			return null;
 		}
 		return body.toString();
 	}
@@ -78,8 +78,8 @@ public class CloudkickAPI {
 				nodes[i] = new Node(rawNodes.getJSONObject(i));
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return nodes;
+			//e.printStackTrace();
 		}
 		Log.i(TAG, "Retrieved " + nodes.length + " Nodes");
 		return nodes;

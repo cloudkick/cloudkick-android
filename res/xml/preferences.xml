@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-        <PreferenceCategory
-                android:title="OAuth Data">
+        <PreferenceCategory android:title="test">
          <EditTextPreference
                 android:name="Key"
                 android:summary="Enter your key here"

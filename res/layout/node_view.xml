@@ -25,10 +25,55 @@
     	android:id="@+id/node_detail_hr"
     	android:layout_width="fill_parent"
     	android:layout_height="2dip"
-    	android:layout_marginTop="4dip"
-    	android:layout_marginBottom="4dip"
+    	android:layout_marginTop="6dip"
+    	android:layout_marginBottom="6dip"
     	android:paddingBottom="6dip"
     	android:background="#CCCCCCCC"
     	android:layout_below="@id/node_detail_tags"
     />
+    <TableLayout
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_below="@id/node_detail_hr">
+    	<TableRow>
+    		<TextView
+    			android:text="@string/label_ip_addr"
+    			android:textColor="#FF000000"
+    			android:padding="3dip" />
+    		<TextView
+    			android:id="@+id/value_ip_addr"
+    			android:textColor="#FF000000"
+    			android:padding="3dip" />
+    	</TableRow>
+    	<TableRow>
+	   		<TextView
+    			android:text="@string/label_provider"
+     			android:textColor="#FF000000"
+    			android:padding="3dip" />
+    		<TextView
+    			android:id="@+id/value_provider"
+    			android:textColor="#FF000000"
+    			android:padding="3dip" />
+    	</TableRow>
+    	<TableRow>
+	   		<TextView
+    			android:text="@string/label_status"
+    			android:textColor="#FF000000"
+    			android:padding="3dip" />
+    		<TextView
+    			android:id="@+id/value_status"
+    			android:textColor="#FF000000"
+    			android:padding="3dip" />
+    	</TableRow>
+    	<TableRow>
+	   		<TextView
+    			android:text="@string/label_agent"
+    			android:textColor="#FF000000"
+    			android:padding="3dip" />
+    		<TextView
+    			android:id="@+id/value_agent"
+    			android:textColor="#FF000000"
+    			android:padding="3dip" />
+    	</TableRow>
+    </TableLayout>
 </RelativeLayout>

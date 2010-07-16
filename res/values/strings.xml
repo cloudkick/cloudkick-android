@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, CloudkickActivity!</string>
     <string name="app_name">Cloudkick</string>
+	<string name="label_ip_addr">IP Address</string>
+	<string name="label_provider">Provider</string>
+	<string name="label_status">Status</string>
+	<string name="label_agent">Agent</string>
 </resources>

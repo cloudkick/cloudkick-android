@@ -16,7 +16,8 @@ public class Node implements Serializable {
 	String ipAddress;
 	String id;
 	String agentState;
-	
+	String status;
+
 	public Node(JSONObject obj) {
 		try {
 			name = obj.getString("name");
@@ -26,12 +27,14 @@ public class Node implements Serializable {
 			for (int i = 0; i < tagArray.length(); i++) {
 				tags[i] = tagArray.getString(i);
 			}
-			color = Integer.parseInt(obj.getString("color").replace("#", ""), 16) | (0xFF << 24);
+			color = Integer.parseInt(obj.getString("color").replace("#", ""),
+					16) | (0xFF << 24);
 			providerName = obj.getString("provider_name");
 			ipAddress = obj.getString("ipaddress");
 			id = obj.getString("id");
 			agentState = obj.getString("agent_state");
-			
+			status = obj.getString("status");
+
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -42,38 +45,35 @@ public class Node implements Serializable {
 		return name;
 	}
 
-
 	public String getProviderID() {
 		return providerID;
 	}
-
 
 	public String[] getTags() {
 		return tags;
 	}
 
-
 	public Integer getColor() {
 		return color;
 	}
-
 
 	public String getProviderName() {
 		return providerName;
 	}
 
-
 	public String getIpAddress() {
 		return ipAddress;
 	}
-
 
 	public String getId() {
 		return id;
 	}
 
-
 	public String getAgentState() {
 		return agentState;
+	}
+
+	public String getStatus() {
+		return status;
 	}
 }

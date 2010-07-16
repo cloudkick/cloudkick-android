@@ -35,23 +35,14 @@ public class NodeViewActivity extends Activity {
 			}
 		}
 
-		// Build the info string
-		StringBuilder infoString = new StringBuilder();
-		infoString.append("IP Address: " + node.getIpAddress() + "\n");
-		infoString.append("Provider:   " + node.getProviderName() + "\n");
-		infoString.append("Status:     " + node.getStatus() + "\n");
-		infoString.append("Agent:      " + node.getAgentState() + "\n");
-
 		// Set the background
 		nodeView.setBackgroundDrawable(new ColorDrawable(node.getColor()));
 
 		// Fill in the views
-		TextView nameText = (TextView) nodeView
-				.findViewById(R.id.node_detail_name);
-		TextView tagsText = (TextView) nodeView
-				.findViewById(R.id.node_detail_tags);
-		nameText.setText(node.getName());
-		tagsText.setText(tagString.toString());
+		((TextView) nodeView.findViewById(R.id.node_detail_name)).setText(node
+				.getName());
+		((TextView) nodeView.findViewById(R.id.node_detail_tags))
+				.setText(tagString.toString());
 		((TextView) nodeView.findViewById(R.id.value_ip_addr)).setText(node
 				.getIpAddress());
 		((TextView) nodeView.findViewById(R.id.value_provider)).setText(node

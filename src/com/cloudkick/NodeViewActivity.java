@@ -36,7 +36,8 @@ public class NodeViewActivity extends Activity {
 		}
 
 		// Set the background
-		nodeView.setBackgroundDrawable(new ColorDrawable(node.getColor()));
+		((RelativeLayout) nodeView.findViewById(R.id.node_detail_header))
+				.setBackgroundDrawable(new ColorDrawable(node.getColor()));
 
 		// Fill in the views
 		((TextView) nodeView.findViewById(R.id.node_detail_name)).setText(node

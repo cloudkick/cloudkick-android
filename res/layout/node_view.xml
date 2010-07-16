@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="fill_parent"
     android:padding="0dip"
-    android:drawSelectorOnTop="true">
+    android:drawSelectorOnTop="true"
+    android:background="#FFFFFFFF">
     <RelativeLayout
     	android:id="@+id/node_detail_header"
     	android:layout_width="fill_parent"
@@ -27,11 +28,18 @@
 	        android:layout_below="@id/node_detail_name"
 	    />
 	</RelativeLayout>
+	<View
+		android:id="@+id/node_detail_separator"
+		android:layout_height="1dip"
+		android:layout_width="fill_parent"
+		android:background="#FF000000"
+		android:layout_below="@id/node_detail_header"
+	/>
     <TableLayout
     	android:layout_width="fill_parent"
     	android:layout_height="wrap_content"
     	android:padding="6dip"
-    	android:layout_below="@id/node_detail_header">
+    	android:layout_below="@id/node_detail_separator">
     	<TableRow>
     		<TextView
     			android:text="@string/label_ip_addr"

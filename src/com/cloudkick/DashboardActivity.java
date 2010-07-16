@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,8 +26,10 @@ public class DashboardActivity extends Activity {
 	private NodesAdapter adapter;
 	private Node[] nodes = new Node[0];
 	private SharedPreferences prefs;
+	private final Time lastRefresh = new Time();
 
 	private void refreshNodes() {
+		lastRefresh.setToNow();
 	    progress = ProgressDialog.show(this, "", "Retrieving Nodes...", true);
 		new NodeUpdater().execute();
 	}
@@ -89,9 +92,23 @@ public class DashboardActivity extends Activity {
 		}
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Time now = new Time();
+		now.setToNow();
+		long delta = (now.toMillis(true) - lastRefresh.toMillis(true))/60000;
+		long maxDelta = new Long(prefs.getString("refreshDelta", "5"));
+
+		if (delta >= maxDelta) {
+			refreshNodes();
+		}
+	}
+
 	private class NodeUpdater extends AsyncTask<Void, Void, Node[]> {
 		@Override
 		protected Node[] doInBackground(Void...voids) {
+			lastRefresh.setToNow();
 			return api.getNodes();
 		}
 

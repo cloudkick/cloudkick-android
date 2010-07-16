@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-        <PreferenceCategory android:title="test">
-         <EditTextPreference
-                android:name="Key"
-                android:summary="Enter your key here"
-                android:title="OAuth Key"
-                android:key="editKey" />
-        <EditTextPreference
-                android:name="Secret"
-                android:summary="Enter your key here"
-                android:title="OAuth Secret"
-                android:key="editSecret" />
-        </PreferenceCategory>
+	<PreferenceCategory android:title="Refresh">
+		<ListPreference
+			android:title="Refresh Frequency"
+			android:name="Refresh Frequency"
+			android:summary="How frequently the Dashboard should be refreshed"
+			android:key="refreshDelta"
+			android:defaultValue="5"
+			android:entries="@array/refreshEntries"
+			android:entryValues="@array/refreshValues" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Account">
+		<EditTextPreference
+			android:name="Key"
+			android:summary="Enter your key here"
+			android:title="OAuth Key"
+			android:key="editKey" />
+		<EditTextPreference
+			android:name="Secret"
+			android:summary="Enter your key here"
+			android:title="OAuth Secret"
+			android:key="editSecret" />
+	</PreferenceCategory>
 </PreferenceScreen>

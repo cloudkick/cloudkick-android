@@ -9,7 +9,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class NodeViewActivity extends Activity {
-	private static final String TAG = "Node";
 	private Node node;
 
 	@Override

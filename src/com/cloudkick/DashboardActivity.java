@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.preference.PreferenceManager;
+import android.content.SharedPreferences;
 
 public class DashboardActivity extends Activity {
 	private static final String TAG = "DashboardActivity";
@@ -21,6 +23,7 @@ public class DashboardActivity extends Activity {
 	private ListView dashboard;
 	private NodesAdapter adapter;
 	private Node[] nodes = new Node[0];
+	private SharedPreferences prefs;
 	
 	private void refreshNodes()
 	{
@@ -32,8 +35,10 @@ public class DashboardActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState)
 	{
 	    super.onCreate(savedInstanceState);
-        // You have to hard code your keys for now. This is bad.
-	    api = new CloudkickAPI("", "");
+	    PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+	    prefs = PreferenceManager.getDefaultSharedPreferences(this);
+	    System.out.println(prefs.getString("editKey",""));
+	    api = new CloudkickAPI(prefs.getString("editKey", ""), prefs.getString("editSecret", ""));
 	    
 	    dashboard = new ListView(this);
 	    adapter = new NodesAdapter(this, R.layout.node_item, nodes);

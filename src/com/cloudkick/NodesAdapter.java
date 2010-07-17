@@ -10,7 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class NodesAdapter extends ArrayAdapter<Node> {
-	private int resource;
+	private final int resource;
 
 	public NodesAdapter(Context context, int resource, Node[] nodes)
 	{
@@ -26,7 +26,7 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 
 		String inflater = Context.LAYOUT_INFLATER_SERVICE;
 		LayoutInflater li = (LayoutInflater)getContext().getSystemService(inflater);
-		
+
 		if(convertView==null) {
 			nodeView = new RelativeLayout(getContext());
 			li.inflate(resource, nodeView, true);
@@ -35,7 +35,7 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 		else {
 			nodeView = (RelativeLayout) convertView;
 		}
-		
+
 		// Build the tag string
 		StringBuilder tagString = new StringBuilder();
 		if (node.getTags().length > 0) {
@@ -45,10 +45,10 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 				tagString.append(node.getTags()[i]);
 			}
 		}
-		
+
 		// Set the background
 		nodeView.setBackgroundDrawable(new ColorDrawable(node.getColor()));
-		
+
 		// Set the name and tags
 		TextView nameText = (TextView)nodeView.findViewById(R.id.name);
 		TextView tagsText = (TextView)nodeView.findViewById(R.id.tags);

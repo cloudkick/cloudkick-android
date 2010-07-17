@@ -27,8 +27,7 @@ public class Node implements Serializable {
 			for (int i = 0; i < tagArray.length(); i++) {
 				tags[i] = tagArray.getString(i);
 			}
-			color = Integer.parseInt(obj.getString("color").replace("#", ""),
-					16) | (0xFF << 24);
+			color = Integer.parseInt(obj.getString("color").replace("#", ""), 16) | (0xFF << 24);
 			providerName = obj.getString("provider_name");
 			ipAddress = obj.getString("ipaddress");
 			id = obj.getString("id");

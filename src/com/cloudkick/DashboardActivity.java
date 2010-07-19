@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,10 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ListView;
 
-public class DashboardActivity extends Activity implements OnItemSelectedListener, OnItemClickListener {
+public class DashboardActivity extends Activity implements OnItemClickListener {
 	private static final String TAG = "DashboardActivity";
 	private static final int SETTINGS_ACTIVITY_ID = 0;
 	private CloudkickAPI api;
@@ -31,8 +29,6 @@ public class DashboardActivity extends Activity implements OnItemSelectedListene
 	private Node[] nodes = new Node[0];
 	private SharedPreferences prefs;
 	private final Time lastRefresh = new Time();
-	private Integer selectedPos = null;
-	private View selectedView = null;
 
 	private void refreshNodes() {
 		lastRefresh.setToNow();
@@ -56,7 +52,6 @@ public class DashboardActivity extends Activity implements OnItemSelectedListene
 	    adapter = new NodesAdapter(this, R.layout.node_item, nodes);
 		dashboard.setAdapter(adapter);
 		dashboard.setOnItemClickListener(this);
-		dashboard.setOnItemSelectedListener(this);
 		dashboard.setBackgroundColor(Color.WHITE);
 
 	    setContentView(dashboard);
@@ -106,35 +101,11 @@ public class DashboardActivity extends Activity implements OnItemSelectedListene
 	}
 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		updateHighlighted(view, position);
 		Bundle data = new Bundle();
 		data.putSerializable("node", nodes[position]);
 		Intent intent = new Intent(DashboardActivity.this, NodeViewActivity.class);
 		intent.putExtras(data);
 		startActivity(intent);
-	}
-
-	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		updateHighlighted(view, position);
-	}
-
-	public void onNothingSelected(AdapterView<?> parent) {
-		clearHighlighted();
-		selectedPos = null;
-		selectedView = null;
-	}
-
-	private void updateHighlighted(View view, int position) {
-		view.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-		clearHighlighted();
-		selectedView = view;
-		selectedPos = position;
-	}
-
-	private void clearHighlighted() {
-		if (selectedPos != null && selectedView != null) {
-			selectedView.setBackgroundDrawable(new ColorDrawable(nodes[selectedPos].getColor()));
-		}
 	}
 
 	@Override

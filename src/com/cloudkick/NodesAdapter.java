@@ -1,7 +1,9 @@
 package com.cloudkick;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +49,13 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 		}
 
 		// Set the background
-		nodeView.setBackgroundDrawable(new ColorDrawable(node.getColor()));
+		ColorDrawable transparent = new ColorDrawable(Color.TRANSPARENT);
+		ColorDrawable opaque = new ColorDrawable(node.getColor());
+		StateListDrawable bg = new StateListDrawable();
+		bg.addState(new int[] {android.R.attr.state_selected}, transparent);
+		bg.addState(new int[] {android.R.attr.state_pressed}, transparent);
+		bg.addState(new int[] {}, opaque);
+		nodeView.setBackgroundDrawable(bg);
 
 		// Set the name and tags
 		TextView nameText = (TextView)nodeView.findViewById(R.id.name);

@@ -136,7 +136,7 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 					progress = null;
 				}
 				else {
-					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Updated Nodes", Toast.LENGTH_SHORT).show();
+					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Dashboard Refreshed", Toast.LENGTH_SHORT).show();
 				}
 			}
 			catch (Exception e) {

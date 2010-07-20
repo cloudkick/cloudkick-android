@@ -1,5 +1,7 @@
 package com.cloudkick;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class DashboardActivity extends Activity implements OnItemClickListener {
 	private static final String TAG = "DashboardActivity";
@@ -26,17 +29,17 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	private ProgressDialog progress;
 	private ListView dashboard;
 	private NodesAdapter adapter;
-	private Node[] nodes = new Node[0];
+	private final ArrayList<Node> nodes = new ArrayList<Node>();
 	private SharedPreferences prefs;
 	private final Time lastRefresh = new Time();
 
 	private void refreshNodes() {
 		lastRefresh.setToNow();
-	    progress = ProgressDialog.show(this, "", "Retrieving Nodes...", true);
 		new NodeUpdater().execute();
 	}
 
 	private void reloadAPI() {
+	    progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
 	    api = new CloudkickAPI(prefs.getString("editKey", ""), prefs.getString("editSecret", ""));
 	    refreshNodes();
 	}
@@ -102,7 +105,7 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Bundle data = new Bundle();
-		data.putSerializable("node", nodes[position]);
+		data.putSerializable("node", nodes.get(position));
 		Intent intent = new Intent(DashboardActivity.this, NodeViewActivity.class);
 		intent.putExtras(data);
 		startActivity(intent);
@@ -114,22 +117,27 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	  setContentView(dashboard);
 	}
 
-	private class NodeUpdater extends AsyncTask<Void, Void, Node[]> {
+	private class NodeUpdater extends AsyncTask<Void, Void, ArrayList<Node>> {
 		@Override
-		protected Node[] doInBackground(Void...voids) {
+		protected ArrayList<Node> doInBackground(Void...voids) {
 			lastRefresh.setToNow();
 			return api.getNodes();
 		}
 
 		@Override
-		protected void onPostExecute(Node[] retrieved_nodes) {
+		protected void onPostExecute(ArrayList<Node> retrieved_nodes) {
 			try {
-				Log.i(TAG, "Retrieved " + retrieved_nodes.length + " Nodes");
-				adapter = new NodesAdapter(DashboardActivity.this, R.layout.node_item, retrieved_nodes);
-				nodes = retrieved_nodes;
-				dashboard.setAdapter(adapter);
+				Log.i(TAG, "Retrieved " + retrieved_nodes.size() + " Nodes");
+				nodes.clear();
+				nodes.addAll(retrieved_nodes);
 				adapter.notifyDataSetChanged();
-				progress.dismiss();
+				if (progress != null) {
+					progress.dismiss();
+					progress = null;
+				}
+				else {
+					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Updated Nodes", Toast.LENGTH_SHORT).show();
+				}
 			}
 			catch (Exception e) {
 				progress.dismiss();

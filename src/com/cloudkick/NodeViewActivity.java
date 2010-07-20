@@ -39,18 +39,12 @@ public class NodeViewActivity extends Activity {
 				.setBackgroundDrawable(new ColorDrawable(node.getColor()));
 
 		// Fill in the views
-		((TextView) nodeView.findViewById(R.id.node_detail_name)).setText(node
-				.getName());
-		((TextView) nodeView.findViewById(R.id.node_detail_tags))
-				.setText(tagString.toString());
-		((TextView) nodeView.findViewById(R.id.value_ip_addr)).setText(node
-				.getIpAddress());
-		((TextView) nodeView.findViewById(R.id.value_provider)).setText(node
-				.getProviderName());
-		((TextView) nodeView.findViewById(R.id.value_status)).setText(node
-				.getStatus());
-		((TextView) nodeView.findViewById(R.id.value_agent)).setText(node
-				.getAgentState());
+		((TextView) nodeView.findViewById(R.id.node_detail_name)).setText(node.getName());
+		((TextView) nodeView.findViewById(R.id.node_detail_tags)).setText(tagString.toString());
+		((TextView) nodeView.findViewById(R.id.value_ip_addr)).setText(node.getIpAddress());
+		((TextView) nodeView.findViewById(R.id.value_provider)).setText(node.getProviderName());
+		((TextView) nodeView.findViewById(R.id.value_status)).setText(node.getStatus());
+		((TextView) nodeView.findViewById(R.id.value_agent)).setText(node.getAgentState());
 
 		setContentView(nodeView);
 		setTitle("Node: " + node.getName());

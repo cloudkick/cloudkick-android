@@ -1,5 +1,7 @@
 package com.cloudkick;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -14,7 +16,7 @@ import android.widget.TextView;
 public class NodesAdapter extends ArrayAdapter<Node> {
 	private final int resource;
 
-	public NodesAdapter(Context context, int resource, Node[] nodes)
+	public NodesAdapter(Context context, int resource, ArrayList<Node> nodes)
 	{
 		super(context, resource, nodes);
 		this.resource = resource;

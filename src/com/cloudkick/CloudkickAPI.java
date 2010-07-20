@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.cloudkick;
 
@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
@@ -28,15 +29,15 @@ public class CloudkickAPI {
 	private static final String TAG = "CloudkickAPI";
     private static String API_HOST = "api.cloudkick.com";
     private static String API_VERSION = "1.0";
-    private CommonsHttpOAuthConsumer consumer;
-    private HttpClient client;
-    
-	
+    private final CommonsHttpOAuthConsumer consumer;
+    private final HttpClient client;
+
+
 	public CloudkickAPI(String key, String secret) {
 		consumer = new CommonsHttpOAuthConsumer(key, secret);
 		client = new DefaultHttpClient();
 	}
-	
+
 	private String doRequest(String path) {
 		StringBuilder body = new StringBuilder();
 	    try {
@@ -68,20 +69,19 @@ public class CloudkickAPI {
 		return body.toString();
 	}
 
-	public Node[] getNodes() {
+	public ArrayList<Node> getNodes() {
 		String body = doRequest("/query/nodes");
-		Node[] nodes = null;
+		ArrayList<Node> nodes = new ArrayList<Node>();
 		try {
 			JSONArray rawNodes = new JSONArray(body);
-			nodes = new Node[rawNodes.length()];
 			for (int i = 0; i < rawNodes.length(); i++) {
-				nodes[i] = new Node(rawNodes.getJSONObject(i));
+				nodes.add(new Node(rawNodes.getJSONObject(i)));
 			}
 		} catch (JSONException e) {
 			return nodes;
 			//e.printStackTrace();
 		}
-		Log.i(TAG, "Retrieved " + nodes.length + " Nodes");
+		Log.i(TAG, "Retrieved " + nodes.size() + " Nodes");
 		return nodes;
 	}
 }

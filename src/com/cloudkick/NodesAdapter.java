@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,17 +41,9 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 			nodeView = (RelativeLayout) convertView;
 		}
 
-		// Set the state in this abomination
-		int color = 0xFFFF9C52;
-		if (node.status == "pending") color = 0xFFFFD652;
-		else if (node.status.equals("running")) color = 0xFF75BA14;
-		else if (node.status.equals("rebooting")) color = 0xFF6dafb5;
-		else if (node.status.equals("rebuilding")) color = 0xFF234c59;
-		else if (node.status.equals("terminated")) color = 0xFFd95338;
-		else if (node.status.equals("terminating")) color = 0xFFd9533;
-		Log.i(TAG, "Status: " + node.status);
+		// Set the a color representing the state
 		TextView statusView = (TextView)nodeView.findViewById(R.id.node_item_status);
-		statusView.setBackgroundDrawable(new ColorDrawable(color));
+		statusView.setBackgroundDrawable(new ColorDrawable(node.getStateColor()));
 
 		// Set the background
 		ColorDrawable transparent = new ColorDrawable(Color.TRANSPARENT);

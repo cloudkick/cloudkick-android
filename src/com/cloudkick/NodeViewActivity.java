@@ -24,29 +24,19 @@ public class NodeViewActivity extends Activity {
 		nodeView = new RelativeLayout(this);
 		li.inflate(R.layout.node_view, nodeView, true);
 
-		// Build the tag string
-		StringBuilder tagString = new StringBuilder();
-		if (node.getTags().length > 0) {
-			tagString.append(node.getTags()[0]);
-			for (int i = 1; i < node.tags.length; i++) {
-				tagString.append(", ");
-				tagString.append(node.getTags()[i]);
-			}
-		}
-
 		// Set the background
 		((RelativeLayout) nodeView.findViewById(R.id.node_detail_header))
-				.setBackgroundDrawable(new ColorDrawable(node.getColor()));
+				.setBackgroundDrawable(new ColorDrawable(node.color));
 
 		// Fill in the views
-		((TextView) nodeView.findViewById(R.id.node_detail_name)).setText(node.getName());
-		((TextView) nodeView.findViewById(R.id.node_detail_tags)).setText(tagString.toString());
-		((TextView) nodeView.findViewById(R.id.value_ip_addr)).setText(node.getIpAddress());
-		((TextView) nodeView.findViewById(R.id.value_provider)).setText(node.getProviderName());
-		((TextView) nodeView.findViewById(R.id.value_status)).setText(node.getStatus());
-		((TextView) nodeView.findViewById(R.id.value_agent)).setText(node.getAgentState());
+		((TextView) nodeView.findViewById(R.id.node_detail_name)).setText(node.name);
+		((TextView) nodeView.findViewById(R.id.node_detail_tags)).setText(node.getTagString());
+		((TextView) nodeView.findViewById(R.id.value_ip_addr)).setText(node.name);
+		((TextView) nodeView.findViewById(R.id.value_provider)).setText(node.name);
+		((TextView) nodeView.findViewById(R.id.value_status)).setText(node.name);
+		((TextView) nodeView.findViewById(R.id.value_agent)).setText(node.name);
 
 		setContentView(nodeView);
-		setTitle("Node: " + node.getName());
+		setTitle("Node: " + node.name);
 	}
 }

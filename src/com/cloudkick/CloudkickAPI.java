@@ -89,7 +89,8 @@ public class CloudkickAPI {
 		ArrayList<Node> nodes = new ArrayList<Node>();
 		try {
 			JSONArray rawNodes = new JSONArray(body);
-			for (int i = 0; i < rawNodes.length(); i++) {
+			int rawCount = rawNodes.length();
+			for (int i = 0; i < rawCount; i++) {
 				nodes.add(new Node(rawNodes.getJSONObject(i)));
 			}
 		} catch (JSONException e) {

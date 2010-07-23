@@ -8,15 +8,16 @@ import org.json.JSONObject;
 
 public class Node implements Serializable {
 	private static final long serialVersionUID = -6829386412299389386L;
-	String name;
-	String providerID;
-	String[] tags;
-	Integer color;
-	String providerName;
-	String ipAddress;
-	String id;
-	String agentState;
-	String status;
+	public String name;
+	public String providerID;
+	public String[] tags;
+	public Integer color;
+	public String providerName;
+	public String ipAddress;
+	public String id;
+	public String agentState;
+	public String status;
+	private String tagString = null;
 
 	public Node(JSONObject obj) {
 		try {
@@ -40,39 +41,20 @@ public class Node implements Serializable {
 		}
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public String getProviderID() {
-		return providerID;
-	}
-
-	public String[] getTags() {
-		return tags;
-	}
-
-	public Integer getColor() {
-		return color;
-	}
-
-	public String getProviderName() {
-		return providerName;
-	}
-
-	public String getIpAddress() {
-		return ipAddress;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getAgentState() {
-		return agentState;
-	}
-
-	public String getStatus() {
-		return status;
+	public String getTagString() {
+		if (tagString == null) {
+			// Build the tag string
+			StringBuilder tagBuilder = new StringBuilder();
+			if (tags.length > 0) {
+				tagBuilder.append(tags[0]);
+				boolean isFirst = true;
+				for (String tag: tags) {
+					if (isFirst) isFirst = true;
+					else tagBuilder.append(", " + tag);
+				}
+			}
+			tagString = tagBuilder.toString();
+		}
+		return tagString;
 	}
 }

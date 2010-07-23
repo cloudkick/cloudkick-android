@@ -22,6 +22,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.cloudkick.exceptions.BadCredentialsException;
+import com.cloudkick.exceptions.CredentialsException;
+
 public class DashboardActivity extends Activity implements OnItemClickListener {
 	private static final String TAG = "DashboardActivity";
 	private static final int SETTINGS_ACTIVITY_ID = 0;
@@ -39,9 +42,17 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	}
 
 	private void reloadAPI() {
-	    progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
-	    api = new CloudkickAPI(prefs.getString("editKey", ""), prefs.getString("editSecret", ""));
-	    refreshNodes();
+		lastRefresh.setToNow();
+	    try {
+		    progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
+	    	api = new CloudkickAPI(this);
+	    	refreshNodes();
+	    }
+	    catch (CredentialsException e) {
+			progress.dismiss();
+			Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+	    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
+	    }
 	}
 
 	@Override
@@ -118,15 +129,22 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, ArrayList<Node>> {
+		private Exception error = null;
 		@Override
 		protected ArrayList<Node> doInBackground(Void...voids) {
 			lastRefresh.setToNow();
-			return api.getNodes();
+			try {
+				return api.getNodes();
+			}
+			catch (BadCredentialsException e) {
+				error = e;
+				return null;
+			}
 		}
 
 		@Override
 		protected void onPostExecute(ArrayList<Node> retrieved_nodes) {
-			try {
+			if (retrieved_nodes != null) {
 				Log.i(TAG, "Retrieved " + retrieved_nodes.size() + " Nodes");
 				nodes.clear();
 				nodes.addAll(retrieved_nodes);
@@ -138,9 +156,12 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 				else {
 					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Dashboard Refreshed", Toast.LENGTH_SHORT).show();
 				}
-			}
-			catch (Exception e) {
-				progress.dismiss();
+			} else {
+				if (progress != null) {
+					progress.dismiss();
+					progress = null;
+				}
+				Toast.makeText(DashboardActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
 				Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
 		    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
 			}

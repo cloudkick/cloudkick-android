@@ -22,7 +22,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.cloudkick.exceptions.BadCredentialsException;
+import com.cloudkick.exceptions.EmptyCredentialsException;
 
 
 public class CloudkickAPI {
@@ -31,19 +37,28 @@ public class CloudkickAPI {
     private static String API_VERSION = "1.0";
     private final CommonsHttpOAuthConsumer consumer;
     private final HttpClient client;
+    private SharedPreferences prefs = null;
 
-
-	public CloudkickAPI(String key, String secret) {
+	public CloudkickAPI(Context context) throws EmptyCredentialsException {
+	    prefs = PreferenceManager.getDefaultSharedPreferences(context);
+	    String key = prefs.getString("editKey", "");
+	    String secret = prefs.getString("editSecret", "");
+	    if (key == "" || secret == "") {
+	    		throw new EmptyCredentialsException();
+	    }
 		consumer = new CommonsHttpOAuthConsumer(key, secret);
 		client = new DefaultHttpClient();
 	}
 
-	private String doRequest(String path) {
+	private String doRequest(String path) throws BadCredentialsException {
 		StringBuilder body = new StringBuilder();
 	    try {
 			HttpGet request = new HttpGet("https://" + API_HOST + "/" + API_VERSION + path);
 			consumer.sign(request);
 		    HttpResponse response = client.execute(request);
+		    if (response.getStatusLine().getStatusCode() == 401) {
+		    	throw new BadCredentialsException();
+		    }
 		    InputStream is = response.getEntity().getContent();
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 			String line;
@@ -69,7 +84,7 @@ public class CloudkickAPI {
 		return body.toString();
 	}
 
-	public ArrayList<Node> getNodes() {
+	public ArrayList<Node> getNodes() throws BadCredentialsException {
 		String body = doRequest("/query/nodes");
 		ArrayList<Node> nodes = new ArrayList<Node>();
 		try {

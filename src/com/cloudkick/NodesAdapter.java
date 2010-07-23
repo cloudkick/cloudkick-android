@@ -42,16 +42,6 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 			nodeView = (RelativeLayout) convertView;
 		}
 
-		// Build the tag string
-		StringBuilder tagString = new StringBuilder();
-		if (node.getTags().length > 0) {
-			tagString.append(node.getTags()[0]);
-			for (int i = 1; i < node.tags.length; i++) {
-				tagString.append(", ");
-				tagString.append(node.getTags()[i]);
-			}
-		}
-
 		// Set the state in this abomination
 		int color = 0xFFFF9C52;
 		if (node.status == "pending") color = 0xFFFFD652;
@@ -66,7 +56,7 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 
 		// Set the background
 		ColorDrawable transparent = new ColorDrawable(Color.TRANSPARENT);
-		ColorDrawable opaque = new ColorDrawable(node.getColor());
+		ColorDrawable opaque = new ColorDrawable(node.color);
 		StateListDrawable bg = new StateListDrawable();
 		bg.addState(new int[] {android.R.attr.state_selected}, transparent);
 		bg.addState(new int[] {android.R.attr.state_pressed}, transparent);
@@ -77,7 +67,7 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 		TextView nameText = (TextView)nodeView.findViewById(R.id.name);
 		TextView tagsText = (TextView)nodeView.findViewById(R.id.tags);
 		nameText.setText(node.name);
-		tagsText.setText(tagString.toString());
+		tagsText.setText(node.getTagString());
 
 		return nodeView;
 	}

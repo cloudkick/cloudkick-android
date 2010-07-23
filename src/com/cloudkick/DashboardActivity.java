@@ -129,7 +129,6 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, ArrayList<Node>> {
-		private Exception error = null;
 		@Override
 		protected ArrayList<Node> doInBackground(Void...voids) {
 			lastRefresh.setToNow();
@@ -137,7 +136,6 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 				return api.getNodes();
 			}
 			catch (BadCredentialsException e) {
-				error = e;
 				return null;
 			}
 		}

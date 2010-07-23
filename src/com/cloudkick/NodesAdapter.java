@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class NodesAdapter extends ArrayAdapter<Node> {
+	private static String TAG = "NodesAdapter";
 	private final int resource;
 
 	public NodesAdapter(Context context, int resource, ArrayList<Node> nodes)
@@ -49,6 +51,18 @@ public class NodesAdapter extends ArrayAdapter<Node> {
 				tagString.append(node.getTags()[i]);
 			}
 		}
+
+		// Set the state in this abomination
+		int color = 0xFFFF9C52;
+		if (node.status == "pending") color = 0xFFFFD652;
+		else if (node.status.equals("running")) color = 0xFF75BA14;
+		else if (node.status.equals("rebooting")) color = 0xFF6dafb5;
+		else if (node.status.equals("rebuilding")) color = 0xFF234c59;
+		else if (node.status.equals("terminated")) color = 0xFFd95338;
+		else if (node.status.equals("terminating")) color = 0xFFd9533;
+		Log.i(TAG, "Status: " + node.status);
+		TextView statusView = (TextView)nodeView.findViewById(R.id.node_item_status);
+		statusView.setBackgroundDrawable(new ColorDrawable(color));
 
 		// Set the background
 		ColorDrawable transparent = new ColorDrawable(Color.TRANSPARENT);

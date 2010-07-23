@@ -18,6 +18,7 @@ public class Node implements Serializable {
 	public String agentState;
 	public String status;
 	private String tagString = null;
+	private Integer stateColor = null;
 
 	public Node(JSONObject obj) {
 		try {
@@ -49,12 +50,25 @@ public class Node implements Serializable {
 				tagBuilder.append(tags[0]);
 				boolean isFirst = true;
 				for (String tag: tags) {
-					if (isFirst) isFirst = true;
+					if (isFirst) isFirst = false;
 					else tagBuilder.append(", " + tag);
 				}
 			}
 			tagString = tagBuilder.toString();
 		}
 		return tagString;
+	}
+
+	public Integer getStateColor() {
+		if (stateColor == null) {
+			stateColor = 0xFFFF9C52;
+			if (status == "pending") stateColor = 0xFFFFD652;
+			else if (status.equals("running")) stateColor = 0xFF75BA14;
+			else if (status.equals("rebooting")) stateColor = 0xFF6dafb5;
+			else if (status.equals("rebuilding")) stateColor = 0xFF234c59;
+			else if (status.equals("terminated")) stateColor = 0xFFd95338;
+			else if (status.equals("terminating")) stateColor = 0xFFd9533;
+		}
+		return stateColor;
 	}
 }

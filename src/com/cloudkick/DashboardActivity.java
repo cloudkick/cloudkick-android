@@ -50,7 +50,7 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	    }
 	    catch (CredentialsException e) {
 			progress.dismiss();
-			Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+			Intent settingsActivity = new Intent(getBaseContext(), LoginActivity.class);
 	    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
 	    }
 	}

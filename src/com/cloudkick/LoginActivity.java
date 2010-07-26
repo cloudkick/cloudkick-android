@@ -144,6 +144,9 @@ public class LoginActivity extends Activity {
 				values.add(new BasicNameValuePair("password", pass));
 				values.add(new BasicNameValuePair("account", accts[0]));
 				values.add(new BasicNameValuePair("system", "Cloudkick for Android"));
+				values.add(new BasicNameValuePair("perm_read", "True"));
+				values.add(new BasicNameValuePair("perm_write", "False"));
+				values.add(new BasicNameValuePair("perm_execute", "False"));
 				post.setEntity(new UrlEncodedFormEntity(values));
 				HttpResponse response = client.execute(post);
 				statusCode = response.getStatusLine().getStatusCode();
@@ -154,7 +157,6 @@ public class LoginActivity extends Activity {
 				String line;
 				for (int i = 0; i < 2; i++) {
 					line = rd.readLine();
-					Log.i("LoginActivity", "Got Line: " + line);
 					if (line == null) {
 						statusCode = 0;
 						return null;

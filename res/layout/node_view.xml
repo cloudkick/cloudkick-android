@@ -38,7 +38,7 @@
 	</LinearLayout>
 	<View
 		android:id="@+id/node_detail_separator"
-		android:layout_height="1dip"
+		android:layout_height=".5dip"
 		android:layout_width="fill_parent"
 		android:background="#FF000000"
 		android:layout_below="@id/node_detail_wrapper"

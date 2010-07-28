@@ -5,13 +5,12 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,45 +22,27 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.cloudkick.exceptions.BadCredentialsException;
-import com.cloudkick.exceptions.CredentialsException;
+import com.cloudkick.exceptions.EmptyCredentialsException;
 
 public class DashboardActivity extends Activity implements OnItemClickListener {
 	private static final String TAG = "DashboardActivity";
 	private static final int SETTINGS_ACTIVITY_ID = 0;
+	private static final int LOGIN_ACTIVITY_ID = 1;
+	private static final int refreshRate = 60;
 	private CloudkickAPI api;
 	private ProgressDialog progress;
 	private ListView dashboard;
 	private NodesAdapter adapter;
+	private boolean haveNodes = false;
+	private boolean isRunning = false;
 	private final ArrayList<Node> nodes = new ArrayList<Node>();
-	private SharedPreferences prefs;
-	private final Time lastRefresh = new Time();
-
-	private void refreshNodes() {
-		lastRefresh.setToNow();
-		new NodeUpdater().execute();
-	}
-
-	private void reloadAPI() {
-		lastRefresh.setToNow();
-	    try {
-		    progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
-	    	api = new CloudkickAPI(this);
-	    	refreshNodes();
-	    }
-	    catch (CredentialsException e) {
-			progress.dismiss();
-			Intent settingsActivity = new Intent(getBaseContext(), LoginActivity.class);
-	    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
-	    }
-	}
+	private final Handler reloadHandler = new Handler();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 	    super.onCreate(savedInstanceState);
 	    PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-	    prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
 	    dashboard = new ListView(this);
 	    adapter = new NodesAdapter(this, R.layout.node_item, nodes);
 		dashboard.setAdapter(adapter);
@@ -95,8 +76,17 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	}
 
 	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		setContentView(dashboard);
+	}
+
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == SETTINGS_ACTIVITY_ID) {
+			reloadAPI();
+		}
+		if (requestCode == LOGIN_ACTIVITY_ID) {
 			reloadAPI();
 		}
 	}
@@ -104,14 +94,16 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Time now = new Time();
-		now.setToNow();
-		long delta = (now.toMillis(true) - lastRefresh.toMillis(true))/60000;
-		long maxDelta = new Long(prefs.getString("refreshDelta", "5"));
+		isRunning = true;
+		refreshNodes();
+	}
 
-		if (delta >= maxDelta) {
-			refreshNodes();
-		}
+	@Override
+	protected void onPause() {
+		super.onPause();
+		isRunning = false;
+		reloadHandler.removeCallbacks(reloadService);
+		Log.i(TAG, "Reloading callbacks canceled");
 	}
 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -122,16 +114,27 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 		startActivity(intent);
 	}
 
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-	  super.onConfigurationChanged(newConfig);
-	  setContentView(dashboard);
+	private void refreshNodes() {
+		if (!haveNodes) {
+		    progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
+		}
+		new NodeUpdater().execute();
+	}
+
+	private void reloadAPI() {
+		try {
+			api = new CloudkickAPI(this);
+			haveNodes = false;
+		}
+		catch (EmptyCredentialsException e) {
+			Intent loginActivity = new Intent(getBaseContext(), LoginActivity.class);
+			startActivityForResult(loginActivity, LOGIN_ACTIVITY_ID);
+		}
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, ArrayList<Node>> {
 		@Override
 		protected ArrayList<Node> doInBackground(Void...voids) {
-			lastRefresh.setToNow();
 			try {
 				return api.getNodes();
 			}
@@ -142,27 +145,32 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 
 		@Override
 		protected void onPostExecute(ArrayList<Node> retrieved_nodes) {
-			if (retrieved_nodes != null) {
-				Log.i(TAG, "Retrieved " + retrieved_nodes.size() + " Nodes");
-				nodes.clear();
-				nodes.addAll(retrieved_nodes);
-				adapter.notifyDataSetChanged();
-				if (progress != null) {
-					progress.dismiss();
-					progress = null;
+			if (progress != null) {
+				progress.dismiss();
+				progress = null;
+			}
+			if (isRunning) {
+				if (retrieved_nodes != null) {
+					nodes.clear();
+					nodes.addAll(retrieved_nodes);
+					haveNodes = true;
+					adapter.notifyDataSetChanged();
+					// Schedule the next run
+					reloadHandler.postDelayed(reloadService, refreshRate * 1000);
+					Log.i(TAG, "Next reload in 60 seconds");
+				} else {
+					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
+					Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+			    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
 				}
-				else {
-					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Dashboard Refreshed", Toast.LENGTH_SHORT).show();
-				}
-			} else {
-				if (progress != null) {
-					progress.dismiss();
-					progress = null;
-				}
-				Toast.makeText(DashboardActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
-				Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
-		    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
 			}
 		}
 	}
+
+	private final Runnable reloadService = new Runnable() {
+		public void run() {
+			// This happens asynchronously and schedules the next run
+			refreshNodes();
+		}
+	};
 }

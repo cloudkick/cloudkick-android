@@ -100,4 +100,17 @@ public class CloudkickAPI {
 		Log.i(TAG, "Retrieved " + nodes.size() + " Nodes");
 		return nodes;
 	}
+
+	public Node getNode(String nodeName) throws BadCredentialsException {
+		String body = doRequest("/query/nodes?query=node:" + nodeName);
+		try {
+			Node node = new Node(new JSONArray(body).getJSONObject(0));
+			Log.i(TAG, "Retrieved node: " + node.name);
+			return node;
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

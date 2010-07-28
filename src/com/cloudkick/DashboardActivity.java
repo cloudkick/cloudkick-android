@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -48,7 +49,6 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 		dashboard.setAdapter(adapter);
 		dashboard.setOnItemClickListener(this);
 		dashboard.setBackgroundColor(Color.WHITE);
-
 	    setContentView(dashboard);
 	    reloadAPI();
 	}
@@ -66,11 +66,23 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 		    case R.id.refresh_dashboard:
 		    	refreshNodes();
 		        return true;
+		    case R.id.log_out:
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+				SharedPreferences.Editor editor = prefs.edit();
+				editor.putString("editKey", "");
+				editor.putString("editSecret", "");
+				editor.commit();
+				nodes.clear();
+				adapter.notifyDataSetChanged();
+				Intent loginActivity = new Intent(getBaseContext(), LoginActivity.class);
+				startActivityForResult(loginActivity, LOGIN_ACTIVITY_ID);
+				return true;
 		    case R.id.settings:
 		    	Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
 		    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
 		    	return true;
 		    default:
+		    	// If its not recognized, do nothing
 		        return super.onOptionsItemSelected(item);
 	    }
 	}
@@ -115,10 +127,12 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	}
 
 	private void refreshNodes() {
-		if (!haveNodes) {
-		    progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
+		if (api != null) {
+			if (!haveNodes) {
+			    progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
+			}
+			new NodeUpdater().execute();
 		}
-		new NodeUpdater().execute();
 	}
 
 	private void reloadAPI() {
@@ -127,6 +141,7 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 			haveNodes = false;
 		}
 		catch (EmptyCredentialsException e) {
+			Log.i(TAG, "Empty Credentials, forcing login");
 			Intent loginActivity = new Intent(getBaseContext(), LoginActivity.class);
 			startActivityForResult(loginActivity, LOGIN_ACTIVITY_ID);
 		}

@@ -33,6 +33,7 @@ public class LoginActivity extends Activity {
 	RelativeLayout loginView = null;
 	private String user = null;
 	private String pass = null;
+	private ProgressDialog progress = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -56,7 +57,6 @@ public class LoginActivity extends Activity {
 		}
 	}
 	private class AccountLister extends AsyncTask<Void, Void, ArrayList<String>>{
-		private ProgressDialog progress = null;
 		private Integer statusCode = null;
 
 		@Override
@@ -94,7 +94,6 @@ public class LoginActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(ArrayList<String> accounts) {
-			progress.dismiss();
 			switch (statusCode) {
 				case 200:
 					if (accounts.size() == 1) {
@@ -115,22 +114,18 @@ public class LoginActivity extends Activity {
 					}
 					break;
 				case 400:
+					progress.dismiss();
 					Toast.makeText(LoginActivity.this, "Invalid Username or Password", Toast.LENGTH_LONG).show();
 					break;
 				default:
+					progress.dismiss();
 					Toast.makeText(LoginActivity.this, "An Error Occurred", Toast.LENGTH_LONG).show();
 			};
 		}
 	}
 
 	private class KeyRetriever extends AsyncTask<String, Void, String[]>{
-		private ProgressDialog progress = null;
 		private Integer statusCode = null;
-
-		@Override
-		protected void onPreExecute() {
-			progress = ProgressDialog.show(LoginActivity.this, "", "Retrieving Key...", true);
-		}
 
 		@Override
 		protected String[] doInBackground(String...accts) {

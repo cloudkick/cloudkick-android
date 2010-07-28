@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.cloudkick"
-      android:versionCode="1"
-      android:versionName="1.0">
+      android:versionCode="2"
+      android:versionName="0.1-alpha2">
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>    
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false">
         <activity android:name=".DashboardActivity"
@@ -21,4 +21,4 @@
 		</activity>
 </application>
     <uses-sdk android:minSdkVersion="4" />
-</manifest> 
+</manifest>

@@ -29,7 +29,7 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	private static final String TAG = "DashboardActivity";
 	private static final int SETTINGS_ACTIVITY_ID = 0;
 	private static final int LOGIN_ACTIVITY_ID = 1;
-	private static final int refreshRate = 60;
+	private static final int refreshRate = 30;
 	private CloudkickAPI api;
 	private ProgressDialog progress;
 	private ListView dashboard;
@@ -172,11 +172,11 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 					adapter.notifyDataSetChanged();
 					// Schedule the next run
 					reloadHandler.postDelayed(reloadService, refreshRate * 1000);
-					Log.i(TAG, "Next reload in 60 seconds");
+					Log.i(TAG, "Next reload in " + refreshRate + " seconds");
 				} else {
 					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
 					Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
-			    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
+					startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
 				}
 			}
 		}

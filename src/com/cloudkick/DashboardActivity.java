@@ -99,7 +99,18 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 			reloadAPI();
 		}
 		if (requestCode == LOGIN_ACTIVITY_ID) {
-			reloadAPI();
+			// TODO: There is definitely a better way to do this
+			try {
+				if (data.getBooleanExtra("login", false)) {
+					reloadAPI();
+				}
+				else {
+					finish();
+				}
+			}
+			catch (NullPointerException e) {
+				finish();
+			}
 		}
 	}
 

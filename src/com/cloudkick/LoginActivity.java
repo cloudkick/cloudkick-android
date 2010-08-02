@@ -177,6 +177,9 @@ public class LoginActivity extends Activity {
 			editor.putString("editKey", creds[0]);
 			editor.putString("editSecret", creds[1]);
 			editor.commit();
+			Intent result = new Intent();
+			result.putExtra("login", true);
+			setResult(Activity.RESULT_OK, result);
 			LoginActivity.this.finish();
 		}
 	}

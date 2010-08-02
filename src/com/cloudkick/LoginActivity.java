@@ -115,7 +115,22 @@ public class LoginActivity extends Activity {
 					break;
 				case 400:
 					progress.dismiss();
-					Toast.makeText(LoginActivity.this, "Invalid Username or Password", Toast.LENGTH_LONG).show();
+					if (accounts.get(0).equals("You have enabled multi factor authentication for this account. To access the API key list, please visit the website.")) {
+						AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+						builder.setTitle("MFA is Enabled");
+						String mfaMessage = ("You appear to have multi-factor authentication enabled on your account. "
+											+ "You will need to manually create an API key with read permissions in the "
+											+ "web interface, then enter it directly in the settings panel.");
+						builder.setMessage(mfaMessage);
+						builder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {}
+						});
+						AlertDialog mfaDialog = builder.create();
+						mfaDialog.show();
+					}
+					else {
+						Toast.makeText(LoginActivity.this, "Invalid Username or Password", Toast.LENGTH_LONG).show();
+					}
 					break;
 				default:
 					progress.dismiss();

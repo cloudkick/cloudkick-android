@@ -148,6 +148,9 @@ public class CloudkickAPI {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
+		} catch (NullPointerException e) {
+			// TODO: Figure out what causes these
+			return null;
 		}
 	}
 }

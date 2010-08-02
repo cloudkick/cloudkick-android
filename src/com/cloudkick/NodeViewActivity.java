@@ -1,9 +1,12 @@
 package com.cloudkick;
 
+import java.text.DecimalFormat;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,12 +26,17 @@ public class NodeViewActivity extends Activity {
 	private static final int SETTINGS_ACTIVITY_ID = 0;
 	private static final int LOGIN_ACTIVITY_ID = 1;
 	private Node node;
+	private RelativeLayout nodeView;
 	private CloudkickAPI api;
 	private ProgressDialog progress = null;
 	private static boolean isRunning;
 	private final Handler reloadHandler = new Handler();
 	private final int refreshRate = 60;
 	private final int metricRefreshRate = 20;
+	private String cpuMetric = null;
+	private String memMetric = null;
+	private String diskMetric = null;
+	private final DecimalFormat metricFormat = new DecimalFormat("0.##");
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -36,7 +44,6 @@ public class NodeViewActivity extends Activity {
 		Bundle data = this.getIntent().getExtras();
 		node = (Node) data.getSerializable("node");
 
-		RelativeLayout nodeView;
 		String inflater = Context.LAYOUT_INFLATER_SERVICE;
 		LayoutInflater li = (LayoutInflater) getSystemService(inflater);
 
@@ -62,9 +69,21 @@ public class NodeViewActivity extends Activity {
 		super.onResume();
 		isRunning = true;
 		reloadService.run();
-		diskCheckService.run();
-		cpuCheckService.run();
-		memCheckService.run();
+		if (node.agentState.equals("connected")) {
+			diskCheckService.run();
+			cpuCheckService.run();
+			memCheckService.run();
+		}
+		else {
+			Log.i(TAG, "agentState = \"" + node.agentState + "\"");
+			((TextView) findViewById(R.id.value_cpu))
+				.setText("Agent Not Connected");
+			((TextView) findViewById(R.id.value_mem))
+				.setText("Agent Not Connected");
+			((TextView) findViewById(R.id.value_disk))
+				.setText("Agent Not Connected");
+		}
+
 		Log.i(TAG, "Refresh services started");
 	}
 
@@ -77,6 +96,12 @@ public class NodeViewActivity extends Activity {
 		reloadHandler.removeCallbacks(cpuCheckService);
 		reloadHandler.removeCallbacks(memCheckService);
 		Log.i(TAG, "Reloading callbacks canceled");
+	}
+
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		
 	}
 
 	private void reloadAPI() {
@@ -160,18 +185,30 @@ public class NodeViewActivity extends Activity {
 			Log.i(TAG, "Check Retrieved: " + checkName);
 			if (isRunning && retrieved_check != null) {
 				if (checkName == "disk") {
+					Float blocks = retrieved_check.metrics.get("blocks");
+					Float bfree = retrieved_check.metrics.get("bfree");
+					Float percentage = (1 - (bfree / blocks)) * 100;
+					Float mbUsed = ((blocks - bfree) * 4096) / (1024 * 1024);
+
 					((TextView) findViewById(R.id.value_disk))
-						.setText(retrieved_check.status);
+						.setText(metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used");
 					reloadHandler.postDelayed(diskCheckService, metricRefreshRate * 1000);
 				}
 				else if (checkName == "cpu") {
+					Float percentage = 100 - retrieved_check.metrics.get("cpu_idle");
+
 					((TextView) findViewById(R.id.value_cpu))
-						.setText(retrieved_check.status);
+						.setText(metricFormat.format(percentage) + "%");
 					reloadHandler.postDelayed(cpuCheckService, metricRefreshRate * 1000);
 				}
 				else if (checkName == "mem") {
+					Float memTotal = retrieved_check.metrics.get("mem_total");
+					Float memUsed = retrieved_check.metrics.get("mem_used");
+					Float mbUsed = (memUsed / (1024 * 1024));
+					Float percentage = (memUsed / memTotal) * 100;
+
 					((TextView) findViewById(R.id.value_mem))
-						.setText(retrieved_check.status);
+						.setText(metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used");
 					reloadHandler.postDelayed(memCheckService, metricRefreshRate * 1000);
 				}
 				// Schedule the next run

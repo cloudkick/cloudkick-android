@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,16 +32,25 @@ public class NodeViewActivity extends Activity {
 	private final Handler reloadHandler = new Handler();
 	private final int refreshRate = 60;
 	private final int metricRefreshRate = 20;
-	private String cpuMetric = null;
-	private String memMetric = null;
-	private String diskMetric = null;
+	private String cpuMetric = "Loading...";
+	private String memMetric = "Loading...";
+	private String diskMetric = "Loading...";
 	private final DecimalFormat metricFormat = new DecimalFormat("0.##");
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Bundle data = this.getIntent().getExtras();
-		node = (Node) data.getSerializable("node");
+		NodeViewState previousState = (NodeViewState) getLastNonConfigurationInstance();
+		if (previousState != null) {
+			node = previousState.node;
+			cpuMetric = previousState.cpuMetric;
+			memMetric = previousState.memMetric;
+			diskMetric = previousState.diskMetric;
+		}
+		else {
+			Bundle data = this.getIntent().getExtras();
+			node = (Node) data.getSerializable("node");
+		}
 
 		String inflater = Context.LAYOUT_INFLATER_SERVICE;
 		LayoutInflater li = (LayoutInflater) getSystemService(inflater);
@@ -75,13 +83,10 @@ public class NodeViewActivity extends Activity {
 			memCheckService.run();
 		}
 		else {
-			Log.i(TAG, "agentState = \"" + node.agentState + "\"");
-			((TextView) findViewById(R.id.value_cpu))
-				.setText("Agent Not Connected");
-			((TextView) findViewById(R.id.value_mem))
-				.setText("Agent Not Connected");
-			((TextView) findViewById(R.id.value_disk))
-				.setText("Agent Not Connected");
+			cpuMetric = "Agent Not Connected";
+			memMetric = "Agent Not Connected";
+			diskMetric = "Agent Not Connected";
+			redraw();
 		}
 
 		Log.i(TAG, "Refresh services started");
@@ -101,7 +106,7 @@ public class NodeViewActivity extends Activity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		
+		return new NodeViewState(node, cpuMetric, memMetric, diskMetric);
 	}
 
 	private void reloadAPI() {
@@ -131,6 +136,10 @@ public class NodeViewActivity extends Activity {
 		((TextView) findViewById(R.id.value_provider)).setText(node.providerName);
 		((TextView) findViewById(R.id.value_status)).setText(node.status);
 		((TextView) findViewById(R.id.value_agent)).setText(node.agentState);
+
+		((TextView) findViewById(R.id.value_cpu)).setText(cpuMetric);
+		((TextView) findViewById(R.id.value_mem)).setText(memMetric);
+		((TextView) findViewById(R.id.value_disk)).setText(diskMetric);
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, Node> {
@@ -183,34 +192,44 @@ public class NodeViewActivity extends Activity {
 		@Override
 		protected void onPostExecute(Check retrieved_check) {
 			Log.i(TAG, "Check Retrieved: " + checkName);
-			if (isRunning && retrieved_check != null) {
-				if (checkName == "disk") {
-					Float blocks = retrieved_check.metrics.get("blocks");
-					Float bfree = retrieved_check.metrics.get("bfree");
-					Float percentage = (1 - (bfree / blocks)) * 100;
-					Float mbUsed = ((blocks - bfree) * 4096) / (1024 * 1024);
-
-					((TextView) findViewById(R.id.value_disk))
-						.setText(metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used");
+			if (isRunning) {
+				if (checkName.equals("disk")) {
+					try {
+						Float blocks = retrieved_check.metrics.get("blocks");
+						Float bfree = retrieved_check.metrics.get("bfree");
+						Float percentage = (1 - (bfree / blocks)) * 100;
+						Float mbUsed = ((blocks - bfree) * 4096) / (1024 * 1024);
+						diskMetric = metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used";
+					}
+					catch (NullPointerException e) {
+						diskMetric = "Load Error";
+					}
 					reloadHandler.postDelayed(diskCheckService, metricRefreshRate * 1000);
 				}
-				else if (checkName == "cpu") {
-					Float percentage = 100 - retrieved_check.metrics.get("cpu_idle");
-
-					((TextView) findViewById(R.id.value_cpu))
-						.setText(metricFormat.format(percentage) + "%");
+				else if (checkName.equals("cpu")) {
+					try {
+						Float percentage = 100 - retrieved_check.metrics.get("cpu_idle");
+						cpuMetric = metricFormat.format(percentage) + "%";
+					}
+					catch (NullPointerException e) {
+						cpuMetric = "Load Error";
+					}
 					reloadHandler.postDelayed(cpuCheckService, metricRefreshRate * 1000);
 				}
-				else if (checkName == "mem") {
-					Float memTotal = retrieved_check.metrics.get("mem_total");
-					Float memUsed = retrieved_check.metrics.get("mem_used");
-					Float mbUsed = (memUsed / (1024 * 1024));
-					Float percentage = (memUsed / memTotal) * 100;
-
-					((TextView) findViewById(R.id.value_mem))
-						.setText(metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used");
+				else if (checkName.equals("mem")) {
+					try {
+						Float memTotal = retrieved_check.metrics.get("mem_total");
+						Float memUsed = retrieved_check.metrics.get("mem_used");
+						Float mbUsed = (memUsed / (1024 * 1024));
+						Float percentage = (memUsed / memTotal) * 100;
+						memMetric = metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used";
+					}
+					catch (NullPointerException e) {
+						memMetric = "Load Error";
+					}
 					reloadHandler.postDelayed(memCheckService, metricRefreshRate * 1000);
 				}
+				redraw();
 				// Schedule the next run
 				Log.i(TAG, "Next " + checkName + " reload in " + metricRefreshRate + " seconds");
 			}
@@ -251,4 +270,18 @@ public class NodeViewActivity extends Activity {
 			}
 		}
 	};
+
+	private class NodeViewState {
+		public Node node;
+		public String cpuMetric;
+		public String memMetric;
+		public String diskMetric;
+
+		public NodeViewState(Node node, String cpu, String mem, String disk) {
+			this.node = node;
+			this.cpuMetric = cpu;
+			this.memMetric = mem;
+			this.diskMetric = disk;
+		}
+	}
 }

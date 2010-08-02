@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.cloudkick.exceptions.BadCredentialsException;
 import com.cloudkick.exceptions.EmptyCredentialsException;
+import com.cloudkick.monitoring.Check;
 
 public class NodeViewActivity extends Activity {
 	private static final String TAG = "NodeViewActivity";
@@ -27,6 +28,7 @@ public class NodeViewActivity extends Activity {
 	private static boolean isRunning;
 	private final Handler reloadHandler = new Handler();
 	private final int refreshRate = 60;
+	private final int metricRefreshRate = 20;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,10 @@ public class NodeViewActivity extends Activity {
 		super.onResume();
 		isRunning = true;
 		reloadService.run();
-		Log.i(TAG, "Node reloader service started");
+		diskCheckService.run();
+		cpuCheckService.run();
+		memCheckService.run();
+		Log.i(TAG, "Refresh services started");
 	}
 
 	@Override
@@ -68,6 +73,9 @@ public class NodeViewActivity extends Activity {
 		super.onPause();
 		isRunning = false;
 		reloadHandler.removeCallbacks(reloadService);
+		reloadHandler.removeCallbacks(diskCheckService);
+		reloadHandler.removeCallbacks(cpuCheckService);
+		reloadHandler.removeCallbacks(memCheckService);
 		Log.i(TAG, "Reloading callbacks canceled");
 	}
 
@@ -120,8 +128,6 @@ public class NodeViewActivity extends Activity {
 			}
 			if (isRunning) {
 				if (retrieved_node != null) {
-					Log.i(TAG, "Got to Here");
-					Toast.makeText(NodeViewActivity.this, "Refreshed", Toast.LENGTH_LONG);
 					node = retrieved_node;
 					redraw();
 					// Schedule the next run
@@ -136,11 +142,75 @@ public class NodeViewActivity extends Activity {
 		}
 	}
 
+	private class MetricUpdater extends AsyncTask<String, Void, Check> {
+		private String checkName;
+		@Override
+		protected Check doInBackground(String...checks) {
+			checkName = checks[0];
+			try {
+				return api.getCheck(node.id, checkName);
+			}
+			catch (BadCredentialsException e) {
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Check retrieved_check) {
+			Log.i(TAG, "Check Retrieved: " + checkName);
+			if (isRunning && retrieved_check != null) {
+				if (checkName == "disk") {
+					((TextView) findViewById(R.id.value_disk))
+						.setText(retrieved_check.status);
+					reloadHandler.postDelayed(diskCheckService, metricRefreshRate * 1000);
+				}
+				else if (checkName == "cpu") {
+					((TextView) findViewById(R.id.value_cpu))
+						.setText(retrieved_check.status);
+					reloadHandler.postDelayed(cpuCheckService, metricRefreshRate * 1000);
+				}
+				else if (checkName == "mem") {
+					((TextView) findViewById(R.id.value_mem))
+						.setText(retrieved_check.status);
+					reloadHandler.postDelayed(memCheckService, metricRefreshRate * 1000);
+				}
+				// Schedule the next run
+				Log.i(TAG, "Next " + checkName + " reload in " + metricRefreshRate + " seconds");
+			}
+		}
+	}
+
 	private final Runnable reloadService = new Runnable() {
 		public void run() {
-			// This happens asynchronously and schedules the next run
+			// These happen asynchronously and schedules their own next runs
 			if (api != null) {
 				new NodeUpdater().execute();
+			}
+		}
+	};
+
+	// TODO: Reduce code duplication in here
+
+	private final Runnable diskCheckService = new Runnable() {
+		public void run() {
+			if (api != null) {
+				new MetricUpdater().execute("disk");
+			}
+		}
+	};
+
+	private final Runnable cpuCheckService = new Runnable() {
+		public void run() {
+			if (api != null) {
+				new MetricUpdater().execute("cpu");
+			}
+		}
+	};
+
+	private final Runnable memCheckService = new Runnable() {
+		public void run() {
+			if (api != null) {
+				new MetricUpdater().execute("mem");
 			}
 		}
 	};

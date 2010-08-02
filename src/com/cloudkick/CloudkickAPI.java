@@ -9,18 +9,31 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,31 +42,44 @@ import android.util.Log;
 
 import com.cloudkick.exceptions.BadCredentialsException;
 import com.cloudkick.exceptions.EmptyCredentialsException;
+import com.cloudkick.monitoring.Check;
 
 
 public class CloudkickAPI {
 	private static final String TAG = "CloudkickAPI";
     private static String API_HOST = "api.cloudkick.com";
     private static String API_VERSION = "1.0";
-    private final CommonsHttpOAuthConsumer consumer;
+    private final String key;
+    private final String secret;
     private final HttpClient client;
     private SharedPreferences prefs = null;
 
 	public CloudkickAPI(Context context) throws EmptyCredentialsException {
 	    prefs = PreferenceManager.getDefaultSharedPreferences(context);
-	    String key = prefs.getString("editKey", "");
-	    String secret = prefs.getString("editSecret", "");
+	    key = prefs.getString("editKey", "");
+	    secret = prefs.getString("editSecret", "");
 	    if (key == "" || secret == "") {
 	    		throw new EmptyCredentialsException();
 	    }
-		consumer = new CommonsHttpOAuthConsumer(key, secret);
-		client = new DefaultHttpClient();
+
+		HttpParams params = new BasicHttpParams();
+		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+		HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
+		HttpProtocolParams.setUseExpectContinue(params, true);
+
+	    SchemeRegistry registry = new SchemeRegistry();
+	    registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+	    registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+
+		ClientConnectionManager connman = new ThreadSafeClientConnManager(params, registry);
+		client = new DefaultHttpClient(connman, params);
 	}
 
 	private String doRequest(String path) throws BadCredentialsException {
 		StringBuilder body = new StringBuilder();
 	    try {
 			HttpGet request = new HttpGet("https://" + API_HOST + "/" + API_VERSION + path);
+			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(key, secret);
 			consumer.sign(request);
 		    HttpResponse response = client.execute(request);
 		    if (response.getStatusLine().getStatusCode() == 401) {
@@ -107,6 +133,17 @@ public class CloudkickAPI {
 			Node node = new Node(new JSONArray(body).getJSONObject(0));
 			Log.i(TAG, "Retrieved node: " + node.name);
 			return node;
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public Check getCheck(String nodeId, String checkName) throws BadCredentialsException {
+		String body = doRequest("/query/node/" + nodeId + "/check/" + checkName);
+		try {
+			return new Check(new JSONObject(body));
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

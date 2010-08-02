@@ -107,7 +107,8 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	protected void onResume() {
 		super.onResume();
 		isRunning = true;
-		refreshNodes();
+		reloadService.run();
+		Log.i(TAG, "Reloading service started");
 	}
 
 	@Override

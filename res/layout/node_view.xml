@@ -88,5 +88,38 @@
 				android:textColor="#FF000000"
 				android:padding="3dip" />
 		</TableRow>
+		<TableRow>
+			<TextView
+				android:text="@string/label_cpu"
+				android:textColor="#FF000000"
+				android:padding="3dip" />
+			<TextView
+				android:id="@+id/value_cpu"
+				android:textColor="#FF000000"
+				android:padding="3dip"
+				android:text="@string/loading_message" />
+		</TableRow>
+		<TableRow>
+			<TextView
+				android:text="@string/label_mem"
+				android:textColor="#FF000000"
+				android:padding="3dip" />
+			<TextView
+				android:id="@+id/value_mem"
+				android:textColor="#FF000000"
+				android:padding="3dip"
+				android:text="@string/loading_message" />
+		</TableRow>
+		<TableRow>
+			<TextView
+				android:text="@string/label_disk"
+				android:textColor="#FF000000"
+				android:padding="3dip" />
+			<TextView
+				android:id="@+id/value_disk"
+				android:textColor="#FF000000"
+				android:padding="3dip"
+				android:text="@string/loading_message" />
+		</TableRow>
 	</TableLayout>
 </RelativeLayout>

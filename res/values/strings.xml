@@ -5,4 +5,8 @@
 	<string name="label_provider">Provider</string>
 	<string name="label_status">Status</string>
 	<string name="label_agent">Agent</string>
+	<string name="label_mem">Memory Use</string>
+	<string name="label_disk">Disk Use</string>
+	<string name="label_cpu">CPU Use</string>
+	<string name="loading_message">Loading...</string>
 </resources>

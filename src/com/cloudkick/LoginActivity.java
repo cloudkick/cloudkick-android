@@ -32,6 +32,7 @@ import android.widget.Toast;
 public class LoginActivity extends Activity {
 	private static final int SETTINGS_ACTIVITY_ID = 0;
 	RelativeLayout loginView = null;
+	private final boolean passFocused = false;
 	private String user = null;
 	private String pass = null;
 	private ProgressDialog progress = null;

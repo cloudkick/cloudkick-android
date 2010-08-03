@@ -30,6 +30,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class LoginActivity extends Activity {
+	private static final int SETTINGS_ACTIVITY_ID = 0;
 	RelativeLayout loginView = null;
 	private String user = null;
 	private String pass = null;
@@ -45,6 +46,23 @@ public class LoginActivity extends Activity {
 		findViewById(R.id.button_signup).setOnClickListener(new SignupClickListener());
 	}
 
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == SETTINGS_ACTIVITY_ID) {
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+			if (prefs.getString("editKey", "").equals("") && prefs.getString("editSecret", "").equals("")) {
+				finish();
+			}
+			else {
+				Intent result = new Intent();
+				result.putExtra("login", true);
+				setResult(Activity.RESULT_OK, result);
+				finish();
+			}
+		}
+	}
+
 	private class LoginClickListener implements View.OnClickListener {
 		public void onClick(View v) {
 			new AccountLister().execute();
@@ -56,6 +74,7 @@ public class LoginActivity extends Activity {
 			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://cloudkick.com/pricing/")));
 		}
 	}
+
 	private class AccountLister extends AsyncTask<Void, Void, ArrayList<String>>{
 		private Integer statusCode = null;
 
@@ -123,7 +142,10 @@ public class LoginActivity extends Activity {
 											+ "web interface, then enter it directly in the settings panel.");
 						builder.setMessage(mfaMessage);
 						builder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {}
+							public void onClick(DialogInterface dialog, int id) {
+								Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+								startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
+							}
 						});
 						AlertDialog mfaDialog = builder.create();
 						mfaDialog.show();

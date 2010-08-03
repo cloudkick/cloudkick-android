@@ -14,7 +14,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class NodesAdapter extends ArrayAdapter<Node> {
-	private static String TAG = "NodesAdapter";
 	private final int resource;
 
 	public NodesAdapter(Context context, int resource, ArrayList<Node> nodes)

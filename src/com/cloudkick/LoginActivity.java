@@ -198,4 +198,5 @@ public class LoginActivity extends Activity {
 			LoginActivity.this.finish();
 		}
 	}
+
 }

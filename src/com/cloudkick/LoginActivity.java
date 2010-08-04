@@ -71,7 +71,7 @@ public class LoginActivity extends Activity {
 
 	private class SignupClickListener implements View.OnClickListener {
 		public void onClick(View v) {
-			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://cloudkick.com/pricing/")));
+			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.cloudkick.com/pricing/")));
 		}
 	}
 
@@ -90,7 +90,7 @@ public class LoginActivity extends Activity {
 			ArrayList<String> accounts = new ArrayList<String>();
 			try {
 				HttpClient client = new DefaultHttpClient();
-				HttpPost post = new HttpPost("https://cloudkick.com/oauth/list_accounts/");
+				HttpPost post = new HttpPost("https://www.cloudkick.com/oauth/list_accounts/");
 				ArrayList<NameValuePair> values = new ArrayList<NameValuePair>(2);
 				values.add(new BasicNameValuePair("user", user));
 				values.add(new BasicNameValuePair("password", pass));
@@ -171,7 +171,7 @@ public class LoginActivity extends Activity {
 			String[] creds = new String[2];
 			try {
 				HttpClient client = new DefaultHttpClient();
-				HttpPost post = new HttpPost("https://cloudkick.com/oauth/create_consumer/");
+				HttpPost post = new HttpPost("https://www.cloudkick.com/oauth/create_consumer/");
 				ArrayList<NameValuePair> values = new ArrayList<NameValuePair>(2);
 				values.add(new BasicNameValuePair("user", user));
 				values.add(new BasicNameValuePair("password", pass));

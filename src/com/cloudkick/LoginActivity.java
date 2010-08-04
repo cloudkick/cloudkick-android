@@ -106,6 +106,7 @@ public class LoginActivity extends Activity {
 				}
 			}
 			catch (Exception e) {
+				e.printStackTrace();
 				statusCode = 0;
 			}
 			return accounts;

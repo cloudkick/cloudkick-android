@@ -12,6 +12,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +37,7 @@ public class NodeViewActivity extends Activity {
 	private final int refreshRate = 60;
 	private final int metricRefreshRate = 20;
 	private final DecimalFormat metricFormat = new DecimalFormat("0.##");
+	private NodeDetailAdapter adapter;
 	private NodeDetailItem[] details;
 
 	// Java's enum's seem utterly worthless, am I missing something?
@@ -68,10 +73,13 @@ public class NodeViewActivity extends Activity {
 		nodeView = new RelativeLayout(this);
 		li.inflate(R.layout.node_view, nodeView, true);
 		setContentView(nodeView);
+		adapter = new NodeDetailAdapter(this, R.layout.node_detail, details);
+		((ListView) findViewById(R.id.node_detail_list)).setAdapter(adapter);
+		redrawHeader();
 
 		// If the name of the node changes we can't exactly refresh it anyway
 		setTitle("Node: " + node.name);
-		redraw();
+
 		reloadAPI();
 	}
 
@@ -96,7 +104,7 @@ public class NodeViewActivity extends Activity {
 			details[CPU].value = "Loading...";
 			details[MEM].value = "Loading...";
 			details[DISK].value = "Loading...";
-			redraw();
+			adapter.notifyDataSetChanged();
 		}
 
 		Log.i(TAG, "Refresh services started");
@@ -130,33 +138,24 @@ public class NodeViewActivity extends Activity {
 		}
 	}
 
+	private void redrawHeader() {
+		// Set the a color representing the state
+		((TextView) findViewById(R.id.node_detail_status))
+			.setBackgroundDrawable(new ColorDrawable(node.getStateColor()));
+
+		// Set the background
+		((RelativeLayout) findViewById(R.id.node_detail_header))
+			.setBackgroundDrawable(new ColorDrawable(node.color));
+
+		((TextView) findViewById(R.id.node_detail_name)).setText(node.name);
+		((TextView) findViewById(R.id.node_detail_tags)).setText(node.getTagString());
+	}
+
 	private void fillNodeDetails() {
 		details[IP] = new NodeDetailItem("IP Address", node.ipAddress, null);
 		details[PROVIDER] = new NodeDetailItem("Provider", node.providerName, null);
 		details[STATUS] = new NodeDetailItem("Status", node.status, null);
 		details[AGENT] = new NodeDetailItem("Agent", node.agentState, null);
-	}
-
-	private void redraw() {
-		// Set the a color representing the state
-		((TextView) findViewById(R.id.node_detail_status))
-				.setBackgroundDrawable(new ColorDrawable(node.getStateColor()));
-
-		// Set the background
-		((RelativeLayout) findViewById(R.id.node_detail_header))
-				.setBackgroundDrawable(new ColorDrawable(node.color));
-
-		// Fill in the views
-		((TextView) findViewById(R.id.node_detail_name)).setText(node.name);
-		((TextView) findViewById(R.id.node_detail_tags)).setText(node.getTagString());
-		((TextView) findViewById(R.id.value_ip_addr)).setText(node.ipAddress);
-		((TextView) findViewById(R.id.value_provider)).setText(node.providerName);
-		((TextView) findViewById(R.id.value_status)).setText(node.status);
-		((TextView) findViewById(R.id.value_agent)).setText(node.agentState);
-
-		((TextView) findViewById(R.id.value_cpu)).setText(details[CPU].value);
-		((TextView) findViewById(R.id.value_mem)).setText(details[MEM].value);
-		((TextView) findViewById(R.id.value_disk)).setText(details[DISK].value);
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, Node> {
@@ -180,7 +179,9 @@ public class NodeViewActivity extends Activity {
 			if (isRunning) {
 				if (retrieved_node != null) {
 					node = retrieved_node;
-					redraw();
+					fillNodeDetails();
+					adapter.notifyDataSetChanged();
+					((TextView) findViewById(R.id.node_detail_tags)).setText(node.getTagString());
 					// Schedule the next run
 					reloadHandler.postDelayed(reloadService, refreshRate * 1000);
 					Log.i(TAG, "Next reload in " + refreshRate + " seconds");
@@ -249,7 +250,7 @@ public class NodeViewActivity extends Activity {
 					}
 					reloadHandler.postDelayed(memCheckService, metricRefreshRate * 1000);
 				}
-				redraw();
+				adapter.notifyDataSetChanged();
 				// Schedule the next run
 				Log.i(TAG, "Next " + checkName + " reload in " + metricRefreshRate + " seconds");
 			}
@@ -301,6 +302,39 @@ public class NodeViewActivity extends Activity {
 		}
 	}
 
+	public class NodeDetailAdapter extends ArrayAdapter<NodeDetailItem> {
+		private final int resource;
+
+		public NodeDetailAdapter(Context context, int resource, NodeDetailItem[] items)
+		{
+			super(context, resource, items);
+			this.resource = resource;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent)
+		{
+			RelativeLayout detailView;
+			NodeDetailItem item = getItem(position);
+
+			String inflater = Context.LAYOUT_INFLATER_SERVICE;
+			LayoutInflater li = (LayoutInflater)getContext().getSystemService(inflater);
+
+			if(convertView == null) {
+				detailView = new RelativeLayout(getContext());
+				li.inflate(resource, detailView, true);
+			}
+
+			else {
+				detailView = (RelativeLayout) convertView;
+			}
+
+			((TextView) detailView.findViewById(R.id.detail_label)).setText(item.label);
+			((TextView) detailView.findViewById(R.id.detail_value)).setText(item.value);
+
+			return detailView;
+		}
+	}
 
 	private class NodeDetailItem {
 		public String label;

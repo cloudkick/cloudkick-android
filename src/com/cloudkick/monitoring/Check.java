@@ -29,6 +29,9 @@ public class Check {
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (OutOfMemoryError e) {
+			// This happens on certain Float values when using < Android 2.2
+			e.printStackTrace();
 		}
 	}
 }

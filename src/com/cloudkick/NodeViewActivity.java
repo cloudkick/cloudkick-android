@@ -32,10 +32,17 @@ public class NodeViewActivity extends Activity {
 	private final Handler reloadHandler = new Handler();
 	private final int refreshRate = 60;
 	private final int metricRefreshRate = 20;
-	private String cpuMetric = "Loading...";
-	private String memMetric = "Loading...";
-	private String diskMetric = "Loading...";
 	private final DecimalFormat metricFormat = new DecimalFormat("0.##");
+	private NodeDetailItem[] details;
+
+	// Java's enum's seem utterly worthless, am I missing something?
+	private final int CPU = 0;
+	private final int MEM = 1;
+	private final int DISK = 2;
+	private final int IP = 3;
+	private final int PROVIDER = 4;
+	private final int STATUS = 5;
+	private final int AGENT = 6;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,13 +50,16 @@ public class NodeViewActivity extends Activity {
 		NodeViewState previousState = (NodeViewState) getLastNonConfigurationInstance();
 		if (previousState != null) {
 			node = previousState.node;
-			cpuMetric = previousState.cpuMetric;
-			memMetric = previousState.memMetric;
-			diskMetric = previousState.diskMetric;
+			details = previousState.details;
 		}
 		else {
 			Bundle data = this.getIntent().getExtras();
 			node = (Node) data.getSerializable("node");
+			details = new NodeDetailItem[7];
+			details[CPU] = new NodeDetailItem("CPU Use", "Loading...", null);
+			details[MEM] = new NodeDetailItem("Memory Use", "Loading...", null);
+			details[DISK] = new NodeDetailItem("Disk Use", "Loading...", null);
+			fillNodeDetails();
 		}
 
 		String inflater = Context.LAYOUT_INFLATER_SERVICE;
@@ -83,9 +93,9 @@ public class NodeViewActivity extends Activity {
 			memCheckService.run();
 		}
 		else {
-			cpuMetric = "Agent Not Connected";
-			memMetric = "Agent Not Connected";
-			diskMetric = "Agent Not Connected";
+			details[CPU].value = "Loading...";
+			details[MEM].value = "Loading...";
+			details[DISK].value = "Loading...";
 			redraw();
 		}
 
@@ -106,7 +116,7 @@ public class NodeViewActivity extends Activity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		return new NodeViewState(node, cpuMetric, memMetric, diskMetric);
+		return new NodeViewState(node, details);
 	}
 
 	private void reloadAPI() {
@@ -118,6 +128,13 @@ public class NodeViewActivity extends Activity {
 			Intent loginActivity = new Intent(getBaseContext(), LoginActivity.class);
 			startActivityForResult(loginActivity, LOGIN_ACTIVITY_ID);
 		}
+	}
+
+	private void fillNodeDetails() {
+		details[IP] = new NodeDetailItem("IP Address", node.ipAddress, null);
+		details[PROVIDER] = new NodeDetailItem("Provider", node.providerName, null);
+		details[STATUS] = new NodeDetailItem("Status", node.status, null);
+		details[AGENT] = new NodeDetailItem("Agent", node.agentState, null);
 	}
 
 	private void redraw() {
@@ -137,9 +154,9 @@ public class NodeViewActivity extends Activity {
 		((TextView) findViewById(R.id.value_status)).setText(node.status);
 		((TextView) findViewById(R.id.value_agent)).setText(node.agentState);
 
-		((TextView) findViewById(R.id.value_cpu)).setText(cpuMetric);
-		((TextView) findViewById(R.id.value_mem)).setText(memMetric);
-		((TextView) findViewById(R.id.value_disk)).setText(diskMetric);
+		((TextView) findViewById(R.id.value_cpu)).setText(details[CPU].value);
+		((TextView) findViewById(R.id.value_mem)).setText(details[MEM].value);
+		((TextView) findViewById(R.id.value_disk)).setText(details[DISK].value);
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, Node> {
@@ -199,20 +216,22 @@ public class NodeViewActivity extends Activity {
 						Float bfree = retrieved_check.metrics.get("bfree");
 						Float percentage = (1 - (bfree / blocks)) * 100;
 						Float mbUsed = ((blocks - bfree) * 4096) / (1024 * 1024);
-						diskMetric = metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used";
+						details[DISK].value =
+							metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used";
 					}
 					catch (NullPointerException e) {
-						diskMetric = "Load Error";
+						details[DISK].value = "Load Error";
 					}
 					reloadHandler.postDelayed(diskCheckService, metricRefreshRate * 1000);
 				}
 				else if (checkName.equals("cpu")) {
 					try {
 						Float percentage = 100 - retrieved_check.metrics.get("cpu_idle");
-						cpuMetric = metricFormat.format(percentage) + "%";
+						details[CPU].value =
+							metricFormat.format(percentage) + "%";
 					}
 					catch (NullPointerException e) {
-						cpuMetric = "Load Error";
+						details[CPU].value = "Load Error";
 					}
 					reloadHandler.postDelayed(cpuCheckService, metricRefreshRate * 1000);
 				}
@@ -222,10 +241,11 @@ public class NodeViewActivity extends Activity {
 						Float memUsed = retrieved_check.metrics.get("mem_used");
 						Float mbUsed = (memUsed / (1024 * 1024));
 						Float percentage = (memUsed / memTotal) * 100;
-						memMetric = metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used";
+						details[MEM].value =
+							metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used";
 					}
 					catch (NullPointerException e) {
-						memMetric = "Load Error";
+						details[MEM].value = "Load Error";
 					}
 					reloadHandler.postDelayed(memCheckService, metricRefreshRate * 1000);
 				}
@@ -272,16 +292,25 @@ public class NodeViewActivity extends Activity {
 	};
 
 	private class NodeViewState {
-		public Node node;
-		public String cpuMetric;
-		public String memMetric;
-		public String diskMetric;
+		public final Node node;
+		public final NodeDetailItem[] details;
 
-		public NodeViewState(Node node, String cpu, String mem, String disk) {
+		public NodeViewState(Node node, NodeDetailItem[] details) {
 			this.node = node;
-			this.cpuMetric = cpu;
-			this.memMetric = mem;
-			this.diskMetric = disk;
+			this.details = details;
+		}
+	}
+
+
+	private class NodeDetailItem {
+		public String label;
+		public String value;
+		public Float percentage;
+
+		public NodeDetailItem(String label, String value, Float percentage) {
+			this.label = label;
+			this.value = value;
+			this.percentage = percentage;
 		}
 	}
 }

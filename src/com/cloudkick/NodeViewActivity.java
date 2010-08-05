@@ -101,9 +101,9 @@ public class NodeViewActivity extends Activity {
 			memCheckService.run();
 		}
 		else {
-			details[CPU].value = "Loading...";
-			details[MEM].value = "Loading...";
-			details[DISK].value = "Loading...";
+			details[CPU].value = "Agent Not Connected";
+			details[MEM].value = "Agent Not Connected";
+			details[DISK].value = "Agent Not Connected";
 			adapter.notifyDataSetChanged();
 		}
 

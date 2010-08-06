@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import oauth.signpost.OAuthConsumer;
@@ -141,7 +142,9 @@ public class CloudkickAPI {
 	}
 
 	public Node getNode(String nodeName) throws BadCredentialsException {
-		String body = doRequest("/query/nodes?query=node:" + nodeName);
+		// All node names are quoted for safety
+		String encodedNode = URLEncoder.encode("\"" + nodeName + "\"");
+		String body = doRequest("/query/nodes?query=node:" + encodedNode);
 		try {
 			Node node = new Node(new JSONArray(body).getJSONObject(0));
 			Log.i(TAG, "Retrieved node: " + node.name);

@@ -173,7 +173,7 @@ public class LoginActivity extends Activity {
 					break;
 				default:
 					progress.dismiss();
-					Toast.makeText(LoginActivity.this, "An Error Occurred", Toast.LENGTH_LONG).show();
+					Toast.makeText(LoginActivity.this, "An Error Occurred Retrieving Your Accounts", Toast.LENGTH_LONG).show();
 			};
 		}
 	}
@@ -200,15 +200,13 @@ public class LoginActivity extends Activity {
 				HttpResponse response = client.execute(post);
 				statusCode = response.getStatusLine().getStatusCode();
 				Log.i("LoginActivity", "Return Code: " + statusCode);
-				if (statusCode != 200) return null;
 			    InputStream is = response.getEntity().getContent();
 				BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 				String line;
 				for (int i = 0; i < 2; i++) {
 					line = rd.readLine();
 					if (line == null) {
-						statusCode = 0;
-						return null;
+						return creds;
 					}
 					creds[i] = line;
 				}
@@ -223,8 +221,14 @@ public class LoginActivity extends Activity {
 		protected void onPostExecute(String[] creds) {
 			progress.dismiss();
 			if (statusCode != 200) {
-				Toast.makeText(LoginActivity.this, "An Error Occurred", Toast.LENGTH_LONG).show();
-				return;
+				// Show short error messages - this is a dirty hack
+				if (creds[0] != null && creds[0].startsWith("User with role")) {
+					Toast.makeText(LoginActivity.this, creds[0], Toast.LENGTH_LONG).show();
+				}
+				else {
+					Toast.makeText(LoginActivity.this, "An Error Occurred on Login", Toast.LENGTH_LONG).show();
+					return;
+				}
 			}
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
 			SharedPreferences.Editor editor = prefs.edit();

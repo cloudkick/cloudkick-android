@@ -61,29 +61,29 @@ import com.cloudkick.monitoring.Check;
 
 public class CloudkickAPI {
 	private static final String TAG = "CloudkickAPI";
-    private static String API_HOST = "api.cloudkick.com";
-    private static String API_VERSION = "1.0";
-    private final String key;
-    private final String secret;
-    private final HttpClient client;
-    private SharedPreferences prefs = null;
+	private static String API_HOST = "api.cloudkick.com";
+	private static String API_VERSION = "1.0";
+	private final String key;
+	private final String secret;
+	private final HttpClient client;
+	private SharedPreferences prefs = null;
 
 	public CloudkickAPI(Context context) throws EmptyCredentialsException {
-	    prefs = PreferenceManager.getDefaultSharedPreferences(context);
-	    key = prefs.getString("editKey", "");
-	    secret = prefs.getString("editSecret", "");
-	    if (key == "" || secret == "") {
-	    		throw new EmptyCredentialsException();
-	    }
+		prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		key = prefs.getString("editKey", "");
+		secret = prefs.getString("editSecret", "");
+		if (key == "" || secret == "") {
+				throw new EmptyCredentialsException();
+		}
 
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 		HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
 		HttpProtocolParams.setUseExpectContinue(params, true);
 
-	    SchemeRegistry registry = new SchemeRegistry();
-	    registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-	    registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+		SchemeRegistry registry = new SchemeRegistry();
+		registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+		registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 
 		ClientConnectionManager connman = new ThreadSafeClientConnManager(params, registry);
 		client = new DefaultHttpClient(connman, params);
@@ -91,19 +91,19 @@ public class CloudkickAPI {
 
 	private String doRequest(String path) throws BadCredentialsException {
 		StringBuilder body = new StringBuilder();
-	    try {
+		try {
 			HttpGet request = new HttpGet("https://" + API_HOST + "/" + API_VERSION + path);
 			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(key, secret);
 			consumer.sign(request);
-		    HttpResponse response = client.execute(request);
-		    if (response.getStatusLine().getStatusCode() == 401) {
-		    	throw new BadCredentialsException();
-		    }
-		    InputStream is = response.getEntity().getContent();
+			HttpResponse response = client.execute(request);
+			if (response.getStatusLine().getStatusCode() == 401) {
+				throw new BadCredentialsException();
+			}
+			InputStream is = response.getEntity().getContent();
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 			String line;
 			while ((line = rd.readLine()) != null) {
-			    body.append(line);
+				body.append(line);
 			}
 		} catch (OAuthMessageSignerException e) {
 			//e.printStackTrace();

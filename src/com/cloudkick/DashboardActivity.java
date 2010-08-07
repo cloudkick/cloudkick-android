@@ -59,31 +59,31 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
-	    super.onCreate(savedInstanceState);
-	    PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-	    dashboard = new ListView(this);
-	    adapter = new NodesAdapter(this, R.layout.node_item, nodes);
+		super.onCreate(savedInstanceState);
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		dashboard = new ListView(this);
+		adapter = new NodesAdapter(this, R.layout.node_item, nodes);
 		dashboard.setAdapter(adapter);
 		dashboard.setOnItemClickListener(this);
 		dashboard.setBackgroundColor(Color.WHITE);
-	    setContentView(dashboard);
-	    reloadAPI();
+		setContentView(dashboard);
+		reloadAPI();
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.dashboard_menu, menu);
-	    return true;
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.dashboard_menu, menu);
+		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    switch (item.getItemId()) {
-		    case R.id.refresh_dashboard:
-		    	refreshNodes();
-		        return true;
-		    case R.id.log_out:
+		switch (item.getItemId()) {
+			case R.id.refresh_dashboard:
+				refreshNodes();
+				return true;
+			case R.id.log_out:
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 				SharedPreferences.Editor editor = prefs.edit();
 				editor.putString("editKey", "");
@@ -94,14 +94,14 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 				Intent loginActivity = new Intent(getBaseContext(), LoginActivity.class);
 				startActivityForResult(loginActivity, LOGIN_ACTIVITY_ID);
 				return true;
-		    case R.id.settings:
-		    	Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
-		    	startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
-		    	return true;
-		    default:
-		    	// If its not recognized, do nothing
-		        return super.onOptionsItemSelected(item);
-	    }
+			case R.id.settings:
+				Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+				startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
+				return true;
+			default:
+				// If its not recognized, do nothing
+				return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override
@@ -158,7 +158,7 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	private void refreshNodes() {
 		if (api != null) {
 			if (!haveNodes) {
-			    progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
+				progress = ProgressDialog.show(this, "", "Loading Nodes...", true);
 			}
 			new NodeUpdater().execute();
 		}

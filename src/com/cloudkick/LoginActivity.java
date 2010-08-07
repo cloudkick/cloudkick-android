@@ -113,12 +113,12 @@ public class LoginActivity extends Activity {
 				post.setEntity(new UrlEncodedFormEntity(values));
 				HttpResponse response = client.execute(post);
 				statusCode = response.getStatusLine().getStatusCode();
-			    InputStream is = response.getEntity().getContent();
+				InputStream is = response.getEntity().getContent();
 				BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 				String line;
 				while ((line = rd.readLine()) != null) {
-				    accounts.add(line);
-				    Log.i("LoginActivity", line);
+					accounts.add(line);
+					Log.i("LoginActivity", line);
 				}
 			}
 			catch (Exception e) {
@@ -200,7 +200,7 @@ public class LoginActivity extends Activity {
 				HttpResponse response = client.execute(post);
 				statusCode = response.getStatusLine().getStatusCode();
 				Log.i("LoginActivity", "Return Code: " + statusCode);
-			    InputStream is = response.getEntity().getContent();
+				InputStream is = response.getEntity().getContent();
 				BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 				String line;
 				for (int i = 0; i < 2; i++) {

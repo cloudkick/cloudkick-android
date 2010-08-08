@@ -202,7 +202,7 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 			// Handle errors
 			if (e != null) {
 				if (e instanceof InvalidCredentialsException) {
-					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Invalid Credentialz", Toast.LENGTH_SHORT).show();
+					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
 					Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
 					startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
 				}
@@ -211,7 +211,7 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 				}
 				else {
 					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Unknown Refresh Error", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "Unknown Error on Node Refresh", e);
+					Log.e(TAG, "Unknown Refresh Error", e);
 				}
 			}
 			// Handle success

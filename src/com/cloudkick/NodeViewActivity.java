@@ -16,7 +16,10 @@
  */
 package com.cloudkick;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
+
+import org.apache.http.auth.InvalidCredentialsException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -136,7 +139,6 @@ public class NodeViewActivity extends Activity {
 		Log.i(TAG, "Reloading callbacks canceled");
 	}
 
-
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		return new NodeViewState(node, details);
@@ -174,12 +176,15 @@ public class NodeViewActivity extends Activity {
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, Node> {
+		private Exception e = null;
+
 		@Override
 		protected Node doInBackground(Void...voids) {
 			try {
 				return api.getNode(node.name);
 			}
 			catch (Exception e) {
+				this.e = e;
 				return null;
 			}
 		}
@@ -187,11 +192,28 @@ public class NodeViewActivity extends Activity {
 		@Override
 		protected void onPostExecute(Node retrieved_node) {
 			Log.i(TAG, "Node retrieved");
+			// Get rid of the progress dialog
 			if (progress != null) {
 				progress.dismiss();
 				progress = null;
 			}
-			if (isRunning) {
+			// Handle Error
+			if (e != null) {
+				if (e instanceof InvalidCredentialsException) {
+					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
+					Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+					startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
+				}
+				else if (e instanceof IOException) {
+					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "A Network Error Occurred", Toast.LENGTH_SHORT).show();
+				}
+				else {
+					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "Unknown Refresh Error", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "Unknown Refresh Error", e);
+				}
+			}
+			// Handle success
+			else if (isRunning) {
 				if (retrieved_node != null) {
 					node = retrieved_node;
 					fillNodeDetails();
@@ -211,6 +233,8 @@ public class NodeViewActivity extends Activity {
 
 	private class MetricUpdater extends AsyncTask<String, Void, Check> {
 		private String checkName;
+		private Exception e = null;
+
 		@Override
 		protected Check doInBackground(String...checks) {
 			checkName = checks[0];
@@ -218,6 +242,7 @@ public class NodeViewActivity extends Activity {
 				return api.getCheck(node.id, checkName);
 			}
 			catch (Exception e) {
+				this.e = e;
 				return null;
 			}
 		}
@@ -225,7 +250,23 @@ public class NodeViewActivity extends Activity {
 		@Override
 		protected void onPostExecute(Check retrieved_check) {
 			Log.i(TAG, "Check Retrieved: " + checkName);
-			if (isRunning) {
+			// Handle error
+			if (e != null) {
+				if (e instanceof InvalidCredentialsException) {
+					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
+					Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+					startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
+				}
+				else if (e instanceof IOException) {
+					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "A Network Error Occurred", Toast.LENGTH_SHORT).show();
+				}
+				else {
+					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "Unknown Refresh Error", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "Unknown Refresh Error", e);
+				}
+			}
+			// Handle success
+			else if (isRunning) {
 				if (checkName.equals("disk")) {
 					try {
 						Float blocks = retrieved_check.metrics.get("blocks");

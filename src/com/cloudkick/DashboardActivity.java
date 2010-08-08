@@ -17,7 +17,10 @@
 
 package com.cloudkick;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.apache.http.auth.InvalidCredentialsException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -39,7 +42,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.cloudkick.exceptions.BadCredentialsException;
 import com.cloudkick.exceptions.EmptyCredentialsException;
 
 public class DashboardActivity extends Activity implements OnItemClickListener {
@@ -177,36 +179,50 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, ArrayList<Node>> {
+		private Exception e = null;
+
 		@Override
 		protected ArrayList<Node> doInBackground(Void...voids) {
 			try {
 				return api.getNodes();
 			}
-			catch (BadCredentialsException e) {
+			catch (Exception e) {
+				this.e = e;
 				return null;
 			}
 		}
 
 		@Override
 		protected void onPostExecute(ArrayList<Node> retrieved_nodes) {
+			// Get rid of the progress dialog either way
 			if (progress != null) {
 				progress.dismiss();
 				progress = null;
 			}
-			if (isRunning) {
-				if (retrieved_nodes != null) {
-					nodes.clear();
-					nodes.addAll(retrieved_nodes);
-					haveNodes = true;
-					adapter.notifyDataSetChanged();
-					// Schedule the next run
-					reloadHandler.postDelayed(reloadService, refreshRate * 1000);
-					Log.i(TAG, "Next reload in " + refreshRate + " seconds");
-				} else {
-					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
+			// Handle errors
+			if (e != null) {
+				if (e instanceof InvalidCredentialsException) {
+					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Invalid Credentialz", Toast.LENGTH_SHORT).show();
 					Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
 					startActivityForResult(settingsActivity, SETTINGS_ACTIVITY_ID);
 				}
+				else if (e instanceof IOException) {
+					Toast.makeText(DashboardActivity.this.getApplicationContext(), "A Network Error Occurred", Toast.LENGTH_SHORT).show();
+				}
+				else {
+					Toast.makeText(DashboardActivity.this.getApplicationContext(), "Unknown Refresh Error", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "Unknown Error on Node Refresh", e);
+				}
+			}
+			// Handle success
+			else if (isRunning) {
+				nodes.clear();
+				nodes.addAll(retrieved_nodes);
+				haveNodes = true;
+				adapter.notifyDataSetChanged();
+				// Schedule the next run
+				reloadHandler.postDelayed(reloadService, refreshRate * 1000);
+				Log.i(TAG, "Next reload in " + refreshRate + " seconds");
 			}
 		}
 	}

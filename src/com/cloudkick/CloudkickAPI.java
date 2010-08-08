@@ -25,13 +25,10 @@ import java.util.ArrayList;
 
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
-import oauth.signpost.exception.OAuthMessageSignerException;
+import oauth.signpost.exception.OAuthException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ClientConnectionManager;
@@ -89,84 +86,47 @@ public class CloudkickAPI {
 		client = new DefaultHttpClient(connman, params);
 	}
 
-	private String doRequest(String path) throws BadCredentialsException {
+	private String doRequest(String path) throws BadCredentialsException, OAuthException, IOException {
 		StringBuilder body = new StringBuilder();
-		try {
-			HttpGet request = new HttpGet("https://" + API_HOST + "/" + API_VERSION + path);
-			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(key, secret);
-			consumer.sign(request);
-			HttpResponse response = client.execute(request);
-			if (response.getStatusLine().getStatusCode() == 401) {
-				throw new BadCredentialsException();
-			}
-			InputStream is = response.getEntity().getContent();
-			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-			String line;
-			while ((line = rd.readLine()) != null) {
-				body.append(line);
-			}
-		} catch (OAuthMessageSignerException e) {
-			//e.printStackTrace();
-			return null;
-		} catch (OAuthExpectationFailedException e) {
-			//e.printStackTrace();
-			return null;
-		} catch (OAuthCommunicationException e) {
-			//e.printStackTrace();
-			return null;
-		} catch (ClientProtocolException e) {
-			//e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			//e.printStackTrace();
-			return null;
+		HttpGet request = new HttpGet("https://" + API_HOST + "/" + API_VERSION + path);
+		OAuthConsumer consumer = new CommonsHttpOAuthConsumer(key, secret);
+		consumer.sign(request);
+		HttpResponse response = client.execute(request);
+		if (response.getStatusLine().getStatusCode() == 401) {
+			throw new BadCredentialsException();
+		}
+		InputStream is = response.getEntity().getContent();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		String line;
+		while ((line = rd.readLine()) != null) {
+			body.append(line);
 		}
 		return body.toString();
 	}
 
-	public ArrayList<Node> getNodes() throws BadCredentialsException {
+	public ArrayList<Node> getNodes() throws BadCredentialsException, OAuthException, IOException, JSONException {
 		String body = doRequest("/query/nodes");
 		ArrayList<Node> nodes = new ArrayList<Node>();
-		try {
-			JSONArray rawNodes = new JSONArray(body);
-			int rawCount = rawNodes.length();
-			for (int i = 0; i < rawCount; i++) {
-				nodes.add(new Node(rawNodes.getJSONObject(i)));
-			}
-		} catch (JSONException e) {
-			return nodes;
-			//e.printStackTrace();
+		JSONArray rawNodes = new JSONArray(body);
+		int rawCount = rawNodes.length();
+		for (int i = 0; i < rawCount; i++) {
+			nodes.add(new Node(rawNodes.getJSONObject(i)));
 		}
 		Log.i(TAG, "Retrieved " + nodes.size() + " Nodes");
 		return nodes;
 	}
 
-	public Node getNode(String nodeName) throws BadCredentialsException {
+	public Node getNode(String nodeName) throws BadCredentialsException, OAuthException, IOException, JSONException {
 		// All node names are quoted for safety
 		String encodedNode = URLEncoder.encode("\"" + nodeName + "\"");
 		String body = doRequest("/query/nodes?query=node:" + encodedNode);
-		try {
-			Node node = new Node(new JSONArray(body).getJSONObject(0));
-			Log.i(TAG, "Retrieved node: " + node.name);
-			return node;
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+		Node node = new Node(new JSONArray(body).getJSONObject(0));
+		Log.i(TAG, "Retrieved node: " + node.name);
+		return node;
 	}
 
-	public Check getCheck(String nodeId, String checkName) throws BadCredentialsException {
+	public Check getCheck(String nodeId, String checkName) throws BadCredentialsException, OAuthException, IOException, JSONException {
 		String body = doRequest("/query/node/" + nodeId + "/check/" + checkName);
-		try {
-			return new Check(new JSONObject(body));
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		} catch (NullPointerException e) {
-			// TODO: Figure out what causes these
-			return null;
-		}
+		return new Check(new JSONObject(body));
 	}
 }

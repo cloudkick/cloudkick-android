@@ -36,7 +36,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cloudkick.exceptions.BadCredentialsException;
 import com.cloudkick.exceptions.EmptyCredentialsException;
 import com.cloudkick.monitoring.Check;
 
@@ -180,7 +179,7 @@ public class NodeViewActivity extends Activity {
 			try {
 				return api.getNode(node.name);
 			}
-			catch (BadCredentialsException e) {
+			catch (Exception e) {
 				return null;
 			}
 		}
@@ -218,7 +217,7 @@ public class NodeViewActivity extends Activity {
 			try {
 				return api.getCheck(node.id, checkName);
 			}
-			catch (BadCredentialsException e) {
+			catch (Exception e) {
 				return null;
 			}
 		}

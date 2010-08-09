@@ -206,6 +206,7 @@ public class NodeViewActivity extends Activity {
 				}
 				else if (e instanceof IOException) {
 					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "A Network Error Occurred", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "Network Error", e);
 				}
 				else {
 					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "Unknown Refresh Error", Toast.LENGTH_SHORT).show();
@@ -259,6 +260,7 @@ public class NodeViewActivity extends Activity {
 				}
 				else if (e instanceof IOException) {
 					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "A Network Error Occurred", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "Network Error", e);
 				}
 				else {
 					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "Unknown Refresh Error", Toast.LENGTH_SHORT).show();

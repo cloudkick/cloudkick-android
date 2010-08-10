@@ -87,19 +87,28 @@ public class CloudkickAPI {
 	}
 
 	private String doRequest(String path) throws BadCredentialsException, OAuthException, IOException {
+		HttpResponse response = null;
 		StringBuilder body = new StringBuilder();
-		HttpGet request = new HttpGet("https://" + API_HOST + "/" + API_VERSION + path);
-		OAuthConsumer consumer = new CommonsHttpOAuthConsumer(key, secret);
-		consumer.sign(request);
-		HttpResponse response = client.execute(request);
-		if (response.getStatusLine().getStatusCode() == 401) {
-			throw new BadCredentialsException();
+		try {
+			HttpGet request = new HttpGet("https://" + API_HOST + "/" + API_VERSION + path);
+			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(key, secret);
+			consumer.sign(request);
+			response = client.execute(request);
+			if (response.getStatusLine().getStatusCode() == 401) {
+				response.getEntity().consumeContent();
+				throw new BadCredentialsException();
+			}
+			InputStream is = response.getEntity().getContent();
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			String line;
+			while ((line = rd.readLine()) != null) {
+				body.append(line);
+			}
 		}
-		InputStream is = response.getEntity().getContent();
-		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-		String line;
-		while ((line = rd.readLine()) != null) {
-			body.append(line);
+		finally {
+			if (response != null && response.getEntity().isStreaming()) {
+				response.getEntity().consumeContent();
+			}
 		}
 		return body.toString();
 	}

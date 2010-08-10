@@ -12,8 +12,23 @@ public class CheckState {
 	public final Integer stateColor;
 
 	public CheckState(JSONObject state) throws JSONException {
-		whence = state.getString("whence");
-		serviceState = state.getString("service_state");
+		// Grab the "whence" if available
+		if (state.has("whence")) {
+			whence = state.getString("whence");
+		}
+		else {
+			whence = null;
+		}
+
+		// Grab the "service_state" if available
+		if (state.has("service_state")) {
+			serviceState = state.getString("service_state");
+		}
+		else {
+			serviceState = "UNKNOWN";
+		}
+
+		// Depending on the serviceState set the status and color
 		if (serviceState.equals("OK")) {
 			status = state.getString("status");
 			stateColor = 0xFFA9F5A9;
@@ -28,6 +43,10 @@ public class CheckState {
 		}
 		else if (serviceState.equals("NO-AGENT")) {
 			status = "Agent Not Connected";
+			stateColor = 0xFFBDBDBD;
+		}
+		else if (serviceState.equals("UNKNOWN")) {
+			status = "No Data Available";
 			stateColor = 0xFFBDBDBD;
 		}
 		else {

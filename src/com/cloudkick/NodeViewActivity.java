@@ -25,9 +25,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,7 +56,7 @@ public class NodeViewActivity extends Activity {
 	private final int nodeRefreshRate = 60;
 	private final int checkRefreshRate = 30;
 	private CheckAdapter adapter;
-	private ArrayList<Check> checks;
+	private ArrayList<CKListItem> checks;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +68,7 @@ public class NodeViewActivity extends Activity {
 		}
 		else {
 			Bundle data = this.getIntent().getExtras();
-			checks = new ArrayList<Check>();
+			checks = new ArrayList<CKListItem>();
 			node = (Node) data.getSerializable("node");
 		}
 
@@ -80,7 +78,7 @@ public class NodeViewActivity extends Activity {
 		nodeView = new RelativeLayout(this);
 		li.inflate(R.layout.node_view, nodeView, true);
 		setContentView(nodeView);
-		adapter = new CheckAdapter(this, R.layout.node_detail, checks);
+		adapter = new CheckAdapter(this, checks);
 		((ListView) findViewById(R.id.node_detail_list)).setAdapter(adapter);
 		redrawHeader();
 
@@ -263,54 +261,26 @@ public class NodeViewActivity extends Activity {
 	};
 
 
-	public class CheckAdapter extends ArrayAdapter<Check> {
-		private final int resource;
+	public class CheckAdapter extends ArrayAdapter<CKListItem> {
 
-		public CheckAdapter(Context context, int resource, ArrayList<Check> checks)
+		public CheckAdapter(Context context, ArrayList<CKListItem> items)
 		{
-			super(context, resource, checks);
-			this.resource = resource;
+			super(context, -1, items);
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent)
 		{
-			RelativeLayout detailView;
-			Check check = getItem(position);
-
-			String inflater = Context.LAYOUT_INFLATER_SERVICE;
-			LayoutInflater li = (LayoutInflater)getContext().getSystemService(inflater);
-
-			if(convertView == null) {
-				detailView = new RelativeLayout(getContext());
-				li.inflate(resource, detailView, true);
-			}
-
-			else {
-				detailView = (RelativeLayout) convertView;
-			}
-
-			// Set the background
-			ColorDrawable transparent = new ColorDrawable(Color.TRANSPARENT);
-			ColorDrawable opaque = new ColorDrawable(check.latestState.stateColor);
-			StateListDrawable bg = new StateListDrawable();
-			bg.addState(new int[] {android.R.attr.state_selected}, transparent);
-			bg.addState(new int[] {android.R.attr.state_pressed}, transparent);
-			bg.addState(new int[] {}, opaque);
-			detailView.setBackgroundDrawable(bg);
-
-			((TextView) detailView.findViewById(R.id.detail_label)).setText(check.type);
-			((TextView) detailView.findViewById(R.id.detail_value)).setText(check.latestState.status);
-
-			return detailView;
+			CKListItem item = getItem(position);
+			return item.getItemView(getContext(), convertView, parent);
 		}
 	}
 
 	private class NodeViewState {
 		public final Node node;
-		public final ArrayList<Check> checks;
+		public final ArrayList<CKListItem> checks;
 
-		public NodeViewState(Node node, ArrayList<Check> checks) {
+		public NodeViewState(Node node, ArrayList<CKListItem> checks) {
 			this.node = node;
 			this.checks = checks;
 		}

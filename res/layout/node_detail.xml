@@ -19,6 +19,7 @@
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:paddingLeft="16dip"
+	android:paddingRight="16dip"
 	android:paddingTop="5dip"
 	android:paddingBottom="5dip">
 	<TextView

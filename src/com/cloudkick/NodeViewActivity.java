@@ -17,7 +17,7 @@
 package com.cloudkick;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import org.apache.http.auth.InvalidCredentialsException;
 
@@ -25,7 +25,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -52,20 +55,10 @@ public class NodeViewActivity extends Activity {
 	private ProgressDialog progress = null;
 	private static boolean isRunning;
 	private final Handler reloadHandler = new Handler();
-	private final int refreshRate = 60;
-	private final int metricRefreshRate = 20;
-	private final DecimalFormat metricFormat = new DecimalFormat("0.##");
-	private NodeDetailAdapter adapter;
-	private NodeDetailItem[] details;
-
-	// Java's enum's seem utterly worthless, am I missing something?
-	private final int CPU = 0;
-	private final int MEM = 1;
-	private final int DISK = 2;
-	private final int IP = 3;
-	private final int PROVIDER = 4;
-	private final int STATUS = 5;
-	private final int AGENT = 6;
+	private final int nodeRefreshRate = 60;
+	private final int checkRefreshRate = 30;
+	private CheckAdapter adapter;
+	private ArrayList<Check> checks;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,16 +66,12 @@ public class NodeViewActivity extends Activity {
 		NodeViewState previousState = (NodeViewState) getLastNonConfigurationInstance();
 		if (previousState != null) {
 			node = previousState.node;
-			details = previousState.details;
+			checks = previousState.checks;
 		}
 		else {
 			Bundle data = this.getIntent().getExtras();
+			checks = new ArrayList<Check>();
 			node = (Node) data.getSerializable("node");
-			details = new NodeDetailItem[7];
-			details[CPU] = new NodeDetailItem("CPU Use", "Loading...", null);
-			details[MEM] = new NodeDetailItem("Memory Use", "Loading...", null);
-			details[DISK] = new NodeDetailItem("Disk Use", "Loading...", null);
-			fillNodeDetails();
 		}
 
 		String inflater = Context.LAYOUT_INFLATER_SERVICE;
@@ -91,13 +80,13 @@ public class NodeViewActivity extends Activity {
 		nodeView = new RelativeLayout(this);
 		li.inflate(R.layout.node_view, nodeView, true);
 		setContentView(nodeView);
-		adapter = new NodeDetailAdapter(this, R.layout.node_detail, details);
+		adapter = new CheckAdapter(this, R.layout.node_detail, checks);
 		((ListView) findViewById(R.id.node_detail_list)).setAdapter(adapter);
 		redrawHeader();
 
 		// If the name of the node changes we can't exactly refresh it anyway
 		setTitle("Node: " + node.name);
-
+		((ImageView) findViewById(R.id.node_detail_separator)).bringToFront();
 		reloadAPI();
 	}
 
@@ -112,19 +101,8 @@ public class NodeViewActivity extends Activity {
 	public void onResume(){
 		super.onResume();
 		isRunning = true;
-		reloadService.run();
-		if (node.agentState.equals("connected")) {
-			diskCheckService.run();
-			cpuCheckService.run();
-			memCheckService.run();
-		}
-		else {
-			details[CPU].value = "Agent Not Connected";
-			details[MEM].value = "Agent Not Connected";
-			details[DISK].value = "Agent Not Connected";
-			adapter.notifyDataSetChanged();
-		}
-
+		nodeReloadService.run();
+		checkReloadService.run();
 		Log.i(TAG, "Refresh services started");
 	}
 
@@ -132,16 +110,14 @@ public class NodeViewActivity extends Activity {
 	public void onPause() {
 		super.onPause();
 		isRunning = false;
-		reloadHandler.removeCallbacks(reloadService);
-		reloadHandler.removeCallbacks(diskCheckService);
-		reloadHandler.removeCallbacks(cpuCheckService);
-		reloadHandler.removeCallbacks(memCheckService);
+		reloadHandler.removeCallbacks(nodeReloadService);
+		reloadHandler.removeCallbacks(checkReloadService);
 		Log.i(TAG, "Reloading callbacks canceled");
 	}
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		return new NodeViewState(node, details);
+		return new NodeViewState(node, checks);
 	}
 
 	private void reloadAPI() {
@@ -166,13 +142,6 @@ public class NodeViewActivity extends Activity {
 
 		((TextView) findViewById(R.id.node_detail_name)).setText(node.name);
 		((TextView) findViewById(R.id.node_detail_tags)).setText(node.getTagString());
-	}
-
-	private void fillNodeDetails() {
-		details[IP] = new NodeDetailItem("IP Address", node.ipAddress, null);
-		details[PROVIDER] = new NodeDetailItem("Provider", node.providerName, null);
-		details[STATUS] = new NodeDetailItem("Status", node.status, null);
-		details[AGENT] = new NodeDetailItem("Agent", node.agentState, null);
 	}
 
 	private class NodeUpdater extends AsyncTask<Void, Void, Node> {
@@ -217,12 +186,12 @@ public class NodeViewActivity extends Activity {
 			else if (isRunning) {
 				if (retrieved_node != null) {
 					node = retrieved_node;
-					fillNodeDetails();
+					//fillNodeDetails();
 					adapter.notifyDataSetChanged();
 					((TextView) findViewById(R.id.node_detail_tags)).setText(node.getTagString());
 					// Schedule the next run
-					reloadHandler.postDelayed(reloadService, refreshRate * 1000);
-					Log.i(TAG, "Next reload in " + refreshRate + " seconds");
+					reloadHandler.postDelayed(nodeReloadService, nodeRefreshRate * 1000);
+					Log.i(TAG, "Next reload in " + nodeRefreshRate + " seconds");
 				} else {
 					Toast.makeText(NodeViewActivity.this.getApplicationContext(), "Invalid Credentials", Toast.LENGTH_SHORT).show();
 					Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
@@ -232,15 +201,13 @@ public class NodeViewActivity extends Activity {
 		}
 	}
 
-	private class MetricUpdater extends AsyncTask<String, Void, Check> {
-		private String checkName;
+	private class CheckUpdater extends AsyncTask<Void, Void, ArrayList<Check>> {
 		private Exception e = null;
 
 		@Override
-		protected Check doInBackground(String...checks) {
-			checkName = checks[0];
+		protected ArrayList<Check> doInBackground(Void...voids) {
 			try {
-				return api.getCheck(node.id, checkName);
+				return api.getChecks(node.id);
 			}
 			catch (Exception e) {
 				this.e = e;
@@ -249,8 +216,7 @@ public class NodeViewActivity extends Activity {
 		}
 
 		@Override
-		protected void onPostExecute(Check retrieved_check) {
-			Log.i(TAG, "Check Retrieved: " + checkName);
+		protected void onPostExecute(ArrayList<Check> retrievedChecks) {
 			// Handle error
 			if (e != null) {
 				if (e instanceof InvalidCredentialsException) {
@@ -269,53 +235,17 @@ public class NodeViewActivity extends Activity {
 			}
 			// Handle success
 			else if (isRunning) {
-				if (checkName.equals("disk")) {
-					try {
-						Float blocks = retrieved_check.metrics.get("blocks");
-						Float bfree = retrieved_check.metrics.get("bfree");
-						Float percentage = (1 - (bfree / blocks)) * 100;
-						Float mbUsed = ((blocks - bfree) * 4096) / (1024 * 1024);
-						details[DISK].value =
-							metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used";
-					}
-					catch (NullPointerException e) {
-						details[DISK].value = "Load Error";
-					}
-					reloadHandler.postDelayed(diskCheckService, metricRefreshRate * 1000);
-				}
-				else if (checkName.equals("cpu")) {
-					try {
-						Float percentage = 100 - retrieved_check.metrics.get("cpu_idle");
-						details[CPU].value =
-							metricFormat.format(percentage) + "%";
-					}
-					catch (NullPointerException e) {
-						details[CPU].value = "Load Error";
-					}
-					reloadHandler.postDelayed(cpuCheckService, metricRefreshRate * 1000);
-				}
-				else if (checkName.equals("mem")) {
-					try {
-						Float memTotal = retrieved_check.metrics.get("mem_total");
-						Float memUsed = retrieved_check.metrics.get("mem_used");
-						Float mbUsed = (memUsed / (1024 * 1024));
-						Float percentage = (memUsed / memTotal) * 100;
-						details[MEM].value =
-							metricFormat.format(percentage) + "%, " + metricFormat.format(mbUsed) + " MB used";
-					}
-					catch (NullPointerException e) {
-						details[MEM].value = "Load Error";
-					}
-					reloadHandler.postDelayed(memCheckService, metricRefreshRate * 1000);
-				}
+				checks.clear();
+				checks.addAll(retrievedChecks);
 				adapter.notifyDataSetChanged();
 				// Schedule the next run
-				Log.i(TAG, "Next " + checkName + " reload in " + metricRefreshRate + " seconds");
+				reloadHandler.postDelayed(checkReloadService, checkRefreshRate * 1000);
+				Log.i(TAG, "Next check reload in " + checkRefreshRate + " seconds");
 			}
 		}
 	}
 
-	private final Runnable reloadService = new Runnable() {
+	private final Runnable nodeReloadService = new Runnable() {
 		public void run() {
 			// These happen asynchronously and schedules their own next runs
 			if (api != null) {
@@ -324,48 +254,21 @@ public class NodeViewActivity extends Activity {
 		}
 	};
 
-	// TODO: Reduce code duplication in here
-
-	private final Runnable diskCheckService = new Runnable() {
+	private final Runnable checkReloadService = new Runnable() {
 		public void run() {
 			if (api != null) {
-				new MetricUpdater().execute("disk");
+				new CheckUpdater().execute();
 			}
 		}
 	};
 
-	private final Runnable cpuCheckService = new Runnable() {
-		public void run() {
-			if (api != null) {
-				new MetricUpdater().execute("cpu");
-			}
-		}
-	};
 
-	private final Runnable memCheckService = new Runnable() {
-		public void run() {
-			if (api != null) {
-				new MetricUpdater().execute("mem");
-			}
-		}
-	};
-
-	private class NodeViewState {
-		public final Node node;
-		public final NodeDetailItem[] details;
-
-		public NodeViewState(Node node, NodeDetailItem[] details) {
-			this.node = node;
-			this.details = details;
-		}
-	}
-
-	public class NodeDetailAdapter extends ArrayAdapter<NodeDetailItem> {
+	public class CheckAdapter extends ArrayAdapter<Check> {
 		private final int resource;
 
-		public NodeDetailAdapter(Context context, int resource, NodeDetailItem[] items)
+		public CheckAdapter(Context context, int resource, ArrayList<Check> checks)
 		{
-			super(context, resource, items);
+			super(context, resource, checks);
 			this.resource = resource;
 		}
 
@@ -373,7 +276,7 @@ public class NodeViewActivity extends Activity {
 		public View getView(int position, View convertView, ViewGroup parent)
 		{
 			RelativeLayout detailView;
-			NodeDetailItem item = getItem(position);
+			Check check = getItem(position);
 
 			String inflater = Context.LAYOUT_INFLATER_SERVICE;
 			LayoutInflater li = (LayoutInflater)getContext().getSystemService(inflater);
@@ -387,22 +290,29 @@ public class NodeViewActivity extends Activity {
 				detailView = (RelativeLayout) convertView;
 			}
 
-			((TextView) detailView.findViewById(R.id.detail_label)).setText(item.label);
-			((TextView) detailView.findViewById(R.id.detail_value)).setText(item.value);
+			// Set the background
+			ColorDrawable transparent = new ColorDrawable(Color.TRANSPARENT);
+			ColorDrawable opaque = new ColorDrawable(check.latestState.stateColor);
+			StateListDrawable bg = new StateListDrawable();
+			bg.addState(new int[] {android.R.attr.state_selected}, transparent);
+			bg.addState(new int[] {android.R.attr.state_pressed}, transparent);
+			bg.addState(new int[] {}, opaque);
+			detailView.setBackgroundDrawable(bg);
+
+			((TextView) detailView.findViewById(R.id.detail_label)).setText(check.type);
+			((TextView) detailView.findViewById(R.id.detail_value)).setText(check.latestState.status);
 
 			return detailView;
 		}
 	}
 
-	private class NodeDetailItem {
-		public String label;
-		public String value;
-		public Float percentage;
+	private class NodeViewState {
+		public final Node node;
+		public final ArrayList<Check> checks;
 
-		public NodeDetailItem(String label, String value, Float percentage) {
-			this.label = label;
-			this.value = value;
-			this.percentage = percentage;
+		public NodeViewState(Node node, ArrayList<Check> checks) {
+			this.node = node;
+			this.checks = checks;
 		}
 	}
 }

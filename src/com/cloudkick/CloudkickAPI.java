@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
@@ -134,8 +135,22 @@ public class CloudkickAPI {
 		return node;
 	}
 
-	public Check getCheck(String nodeId, String checkName) throws BadCredentialsException, OAuthException, IOException, JSONException {
-		String body = doRequest("/query/node/" + nodeId + "/check/" + checkName);
-		return new Check(new JSONObject(body));
+	@SuppressWarnings("unchecked")
+	public ArrayList<Check> getChecks(String nodeId) throws BadCredentialsException, OAuthException, IOException, JSONException {
+		String body = doRequest("/query/check?node=" + nodeId + "&with_states=1");
+		ArrayList<Check> checks = new ArrayList<Check>();
+		JSONArray rawNodesChecks = new JSONArray(body);
+		int rawSetCount = rawNodesChecks.length();
+		for (int i = 0; i < rawSetCount; i++) {
+			JSONObject rawNodeChecks = rawNodesChecks.getJSONObject(i);
+			for (Iterator<String> keysIter = rawNodeChecks.keys(); keysIter.hasNext();) {
+				JSONArray nodeCheckArray = rawNodeChecks.getJSONArray(keysIter.next());
+				int checkCount = nodeCheckArray.length();
+				for (int j = 0; j < checkCount; j++) {
+					checks.add(new Check(nodeCheckArray.getJSONObject(j)));
+				}
+			}
+		}
+		return checks;
 	}
 }

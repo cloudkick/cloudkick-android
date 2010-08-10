@@ -145,6 +145,10 @@ public class DashboardActivity extends Activity implements OnItemClickListener {
 	protected void onPause() {
 		super.onPause();
 		isRunning = false;
+		if (progress != null) {
+			progress.dismiss();
+			progress = null;
+		}
 		reloadHandler.removeCallbacks(reloadService);
 		Log.i(TAG, "Reloading callbacks canceled");
 	}

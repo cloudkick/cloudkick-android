@@ -69,6 +69,7 @@ public class NodeViewActivity extends Activity {
 		else {
 			Bundle data = this.getIntent().getExtras();
 			checks = new ArrayList<CKListItem>();
+			checks.add(new CKListLoadingSpinner());
 			node = (Node) data.getSerializable("node");
 		}
 
@@ -273,6 +274,22 @@ public class NodeViewActivity extends Activity {
 		{
 			CKListItem item = getItem(position);
 			return item.getItemView(getContext(), convertView, parent);
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			return 2;
+		}
+
+		@Override
+		public int getItemViewType(int position) {
+			CKListItem item = getItem(position);
+			if (item instanceof Check) {
+				return 0;
+			}
+			else {
+				return 1;
+			}
 		}
 	}
 

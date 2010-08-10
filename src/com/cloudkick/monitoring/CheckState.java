@@ -39,7 +39,7 @@ public class CheckState {
 		}
 		else if (serviceState.equals("ERROR")) {
 			status = state.getString("status");
-			stateColor = 0xFFF78181;
+			stateColor = 0xFFE34648;
 		}
 		else if (serviceState.equals("NO-AGENT")) {
 			status = "Agent Not Connected";

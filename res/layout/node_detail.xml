@@ -23,11 +23,23 @@
 	android:paddingTop="5dip"
 	android:paddingBottom="5dip">
 	<TextView
-		android:id="@+id/detail_label"
-		android:layout_width="fill_parent"
+		android:id="@+id/detail_symbol"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textStyle="bold"
-		android:textSize="12sp"
+		android:textSize="20dip"
+		android:gravity="right"
+		android:layout_alignParentRight="true" />
+	<TextView
+		android:id="@+id/detail_label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_toLeftOf="@id/detail_symbol"
+		android:layout_alignBottom="@id/detail_symbol"
+		android:gravity="left"
+		android:layout_alignParentLeft="true"
+		android:textStyle="bold"
+		android:textSize="16sp"
 		android:textColor="#FF151515"/>
 	<TextView
 		android:id="@+id/detail_value"

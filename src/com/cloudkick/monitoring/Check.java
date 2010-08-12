@@ -21,9 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,16 +67,9 @@ public class Check extends CKListItem {
 			checkView = (RelativeLayout) convertView;
 		}
 
-		// Set the background
-		ColorDrawable transparent = new ColorDrawable(Color.TRANSPARENT);
-		ColorDrawable opaque = new ColorDrawable(latestState.stateColor);
-		StateListDrawable bg = new StateListDrawable();
-		bg.addState(new int[] {android.R.attr.state_selected}, transparent);
-		bg.addState(new int[] {android.R.attr.state_pressed}, transparent);
-		bg.addState(new int[] {}, opaque);
-		checkView.setBackgroundDrawable(bg);
-
 		((TextView) checkView.findViewById(R.id.detail_label)).setText(label);
+		((TextView) checkView.findViewById(R.id.detail_symbol)).setTextColor(latestState.stateColor);
+		((TextView) checkView.findViewById(R.id.detail_symbol)).setText(latestState.stateSymbol);
 		((TextView) checkView.findViewById(R.id.detail_value)).setText(latestState.status);
 
 		return checkView;

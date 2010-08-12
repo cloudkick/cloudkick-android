@@ -121,15 +121,23 @@ public class CheckViewActivity extends Activity {
 
 	private void redrawCheck() {
 		((TextView) findViewById(R.id.check_detail_name))
-			.setText(nodeName + " " + check.type + " Check");
+			.setText(nodeName + " " + check.label + " Check");
 
 		((TextView) findViewById(R.id.check_detail_current_label))
 			.setText("Latest State (" + check.latestState.whence + ")");
+		((TextView) findViewById(R.id.check_detail_current_symbol))
+			.setText(check.latestState.stateSymbol);
+		((TextView) findViewById(R.id.check_detail_current_symbol))
+			.setTextColor(check.latestState.stateColor);
 		((TextView) findViewById(R.id.check_detail_current_state))
 			.setText(check.latestState.status);
 
 		((TextView) findViewById(R.id.check_detail_previous_label))
-		.setText("Previous State (" + check.previousState.whence + ")");
+			.setText("Previous State (" + check.previousState.whence + ")");
+		((TextView) findViewById(R.id.check_detail_previous_symbol))
+			.setText(check.previousState.stateSymbol);
+		((TextView) findViewById(R.id.check_detail_previous_symbol))
+			.setTextColor(check.previousState.stateColor);
 		((TextView) findViewById(R.id.check_detail_previous_state))
 			.setText(check.previousState.status);
 	}

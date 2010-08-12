@@ -38,6 +38,7 @@ public class Check extends CKListItem {
 	public final CheckState previousState;
 	public final CheckState latestState;
 	public final String type;
+	public final String label;
 	public final String id;
 
 	public Check(JSONObject rawCheck) throws JSONException {
@@ -45,6 +46,12 @@ public class Check extends CKListItem {
 		latestState = new CheckState(rawCheck.getJSONObject("latest_state"));
 		type = rawCheck.getString("type");
 		id = rawCheck.getString("id");
+		if (type.equals("PLUGIN")) {
+			label = rawCheck.getJSONObject("details").getString("check");
+		}
+		else {
+			label = type;
+		}
 	}
 
 	@Override
@@ -72,7 +79,7 @@ public class Check extends CKListItem {
 		bg.addState(new int[] {}, opaque);
 		checkView.setBackgroundDrawable(bg);
 
-		((TextView) checkView.findViewById(R.id.detail_label)).setText(type);
+		((TextView) checkView.findViewById(R.id.detail_label)).setText(label);
 		((TextView) checkView.findViewById(R.id.detail_value)).setText(latestState.status);
 
 		return checkView;

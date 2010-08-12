@@ -42,44 +42,74 @@
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:layout_below="@id/check_detail_name" >
-		<LinearLayout
+		<RelativeLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:padding="16dip"
 			android:orientation="vertical" >
 			<TextView
-				android:id="@+id/check_detail_current_label"
-				android:layout_width="fill_parent"
-				android:layout_height="fill_parent"
+				android:id="@+id/check_detail_current_symbol"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:gravity="right"
 				android:textStyle="bold"
-				android:textColor="#FF151515"
-				 />
+				android:textSize="20dip" />
+			<TextView
+				android:id="@+id/check_detail_current_label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_toLeftOf="@id/check_detail_current_symbol"
+				android:layout_alignBottom="@id/check_detail_current_symbol"
+				android:gravity="left"
+				android:layout_alignParentLeft="true"
+				android:textStyle="bold"
+				android:textSize="16dip"
+				android:textColor="#FF151515" />
 			<View
+				android:id="@+id/check_detail_current_separator"
 				android:layout_width="fill_parent"
 				android:layout_height=".5dip"
+				android:layout_below="@id/check_detail_current_label"
 				android:background="#FFA5A5A5" />
 			<TextView
 				android:id="@+id/check_detail_current_state"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
+				android:layout_below="@id/check_detail_current_separator"
 				android:textColor="#FF454545" />
 
 			<TextView
 				android:id="@+id/check_detail_previous_label"
 				android:paddingTop="16dip"
-				android:layout_width="fill_parent"
-				android:layout_height="fill_parent"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_below="@id/check_detail_current_state"
 				android:textStyle="bold"
-				android:textColor="#FF151515" />
+				android:textColor="#FF151515"
+				android:textSize="16dip" />
+			<TextView
+				android:id="@+id/check_detail_previous_symbol"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignBottom="@id/check_detail_previous_label"
+				android:layout_toRightOf="@id/check_detail_previous_label"
+				android:layout_alignParentRight="true"
+				android:gravity="right"
+				android:textStyle="bold"
+				android:textSize="20dip" />
 			<View
+				android:id="@+id/check_detail_previous_separator"
 				android:layout_width="fill_parent"
 				android:layout_height=".5dip"
+				android:layout_below="@id/check_detail_previous_label"
 				android:background="#FFA5A5A5" />
 			<TextView
 				android:id="@+id/check_detail_previous_state"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
+				android:layout_below="@id/check_detail_previous_separator"
 				android:textColor="#FF454545" />
-		</LinearLayout>
+		</RelativeLayout>
 	</ScrollView>
 </RelativeLayout>

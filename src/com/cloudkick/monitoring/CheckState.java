@@ -18,16 +18,21 @@
 package com.cloudkick.monitoring;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.text.format.Time;
 import android.util.Log;
 
 public class CheckState implements Serializable {
 	private static final long serialVersionUID = -2297216122693619863L;
+	private SimpleDateFormat whenceWireFormat;
 	public final String status;
-	public final String whence;
+	public String whence;
 	public final String serviceState;
 	public final Integer stateColor;
 	public final String stateSymbol;
@@ -35,7 +40,35 @@ public class CheckState implements Serializable {
 	public CheckState(JSONObject state) throws JSONException {
 		// Grab the "whence" if available
 		if (state.has("whence")) {
-			whence = state.getString("whence");
+			whenceWireFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			whenceWireFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+			String whenceString = state.getString("whence");
+			try {
+				long whenceMillis = whenceWireFormat.parse(whenceString).getTime();
+				Time now = new Time();
+				now.setToNow();
+				long diffMillis = ((now.toMillis(true)) - whenceMillis);
+				if (diffMillis < 3600*1000) {
+					whence = String.format("%d m", diffMillis/(1000*60));
+				}
+				else if (diffMillis < (24*3600*1000)) {
+					long mins = (diffMillis / (1000 * 60)) % 60;
+					long hours = (diffMillis / (1000 * 3600));
+					whence = String.format("%d h, %d m", hours, mins);
+				}
+				else if (diffMillis < (7*24*3600*1000)){
+					long hours = (diffMillis / (1000 * 60 * 60)) % 24;
+					long days = (diffMillis / (1000 * 60 * 60 * 24));
+					whence = String.format("%d d, %d h", days, hours);
+				}
+				else {
+					long days = (diffMillis / (1000 * 60 * 60 * 24)) % 7;
+					long weeks = (diffMillis / (1000 * 60 * 60 * 24 * 7));
+					whence = String.format("%d w, %d d", weeks, days);
+				}
+			} catch (ParseException e) {
+				whence = null;
+			}
 		}
 		else {
 			whence = null;

@@ -36,6 +36,7 @@ public class CheckState implements Serializable {
 	public final String serviceState;
 	public final Integer stateColor;
 	public final String stateSymbol;
+	public final Integer priority;
 
 	public CheckState(JSONObject state) throws JSONException {
 		// Grab the "whence" if available
@@ -87,32 +88,38 @@ public class CheckState implements Serializable {
 			status = state.getString("status");
 			stateColor = 0xFF088A08;
 			stateSymbol = "\u2714";
-		}
-		else if (serviceState.equals("WARNING")) {
-			status = state.getString("status");
-			stateColor = 0xFFDF7401;
-			stateSymbol = "!";
+			priority = 4;
 		}
 		else if (serviceState.equals("ERROR")) {
 			status = state.getString("status");
 			stateColor = 0xFFE34648;
 			stateSymbol = "\u2718";
+			priority = 0;
+		}
+		else if (serviceState.equals("WARNING")) {
+			status = state.getString("status");
+			stateColor = 0xFFDF7401;
+			stateSymbol = "!";
+			priority = 1;
 		}
 		else if (serviceState.equals("NO-AGENT")) {
 			status = "Agent Not Connected";
 			stateColor = 0xFF6E6E6E;
 			stateSymbol = "?";
+			priority = 2;
 		}
 		else if (serviceState.equals("UNKNOWN")) {
 			status = "No Data Available";
 			stateColor = 0xFF6E6E6E;
 			stateSymbol = "?";
+			priority = 3;
 		}
 		else {
 			Log.e("Check", "Unknown Service State: " + serviceState);
 			status = state.getString("status");
 			stateColor =  0xFF6E6E6E;
 			stateSymbol = "?";
+			priority = 3;
 		}
 	}
 }

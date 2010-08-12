@@ -23,7 +23,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
-public abstract class CKListItem implements Serializable {
+public abstract class CKListItem implements Serializable, Comparable<CKListItem> {
 	private static final long serialVersionUID = 9175528294607385631L;
 
 	public abstract View getItemView(Context context, View convertView, ViewGroup parent);

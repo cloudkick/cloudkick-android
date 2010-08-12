@@ -18,6 +18,7 @@ package com.cloudkick;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.http.auth.InvalidCredentialsException;
 
@@ -239,6 +240,7 @@ public class NodeViewActivity extends Activity {
 			else if (isRunning) {
 				checks.clear();
 				checks.addAll(retrievedChecks);
+				Collections.sort(checks);
 				adapter.notifyDataSetChanged();
 				// Schedule the next run
 				reloadHandler.postDelayed(checkReloadService, checkRefreshRate * 1000);

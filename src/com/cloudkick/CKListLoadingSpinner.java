@@ -50,4 +50,8 @@ public class CKListLoadingSpinner extends CKListItem {
 
 		return loadingView;
 	}
+
+	public int compareTo(CKListItem another) {
+		return -1;
+	}
 }

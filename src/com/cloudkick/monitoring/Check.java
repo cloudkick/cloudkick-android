@@ -30,7 +30,7 @@ import android.widget.TextView;
 import com.cloudkick.CKListItem;
 import com.cloudkick.R;
 
-public class Check extends CKListItem {
+public class Check extends CKListItem implements Comparable<CKListItem> {
 	private static final long serialVersionUID = 5457450782300306447L;
 	public final CheckState previousState;
 	public final CheckState latestState;
@@ -73,5 +73,12 @@ public class Check extends CKListItem {
 		((TextView) checkView.findViewById(R.id.detail_value)).setText(latestState.status);
 
 		return checkView;
+	}
+
+	public int compareTo(CKListItem otherItem) {
+		if (otherItem instanceof Check) {
+			return (latestState.priority - ((Check) otherItem).latestState.priority);
+		}
+		else return 1;
 	}
 }

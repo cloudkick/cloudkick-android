@@ -33,6 +33,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -81,6 +83,7 @@ public class NodeViewActivity extends Activity {
 		setContentView(nodeView);
 		adapter = new CheckAdapter(this, checks);
 		((ListView) findViewById(R.id.node_detail_list)).setAdapter(adapter);
+		((ListView) findViewById(R.id.node_detail_list)).setOnItemClickListener(checkClickListener);
 		redrawHeader();
 
 		// If the name of the node changes we can't exactly refresh it anyway
@@ -302,4 +305,23 @@ public class NodeViewActivity extends Activity {
 			this.checks = checks;
 		}
 	}
+
+	private OnItemClickListener checkClickListener = new OnItemClickListener() {
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			CKListItem item = checks.get(position);
+			if (item instanceof Check) {
+				// Build the bundle
+				Bundle data = new Bundle();
+				data.putString("nodeName", node.name);
+				data.putString("nodeId", node.id);
+				data.putString("checkId", ((Check) item).id);
+				data.putSerializable("check", (item));
+
+				// Start a CheckViewActivity
+				Intent intent = new Intent(NodeViewActivity.this, CheckViewActivity.class);
+				intent.putExtras(data);
+				startActivity(intent);
+			}
+		}
+	};
 }

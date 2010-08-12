@@ -34,14 +34,17 @@ import com.cloudkick.CKListItem;
 import com.cloudkick.R;
 
 public class Check extends CKListItem {
+	private static final long serialVersionUID = 5457450782300306447L;
 	public final CheckState previousState;
 	public final CheckState latestState;
 	public final String type;
+	public final String id;
 
 	public Check(JSONObject rawCheck) throws JSONException {
 		previousState = new CheckState(rawCheck.getJSONObject("previous_state"));
 		latestState = new CheckState(rawCheck.getJSONObject("latest_state"));
 		type = rawCheck.getString("type");
+		id = rawCheck.getString("id");
 	}
 
 	@Override

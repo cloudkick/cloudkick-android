@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  Licensed to Cloudkick, Inc ('Cloudkick') under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  Cloudkick licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:background="#FFFFFFFF" >
+	<TextView
+		android:id="@+id/check_detail_name"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_vertical"
+		android:textStyle="bold"
+		android:textSize="20sp"
+		android:paddingLeft="16dip"
+		android:paddingTop="12dip"
+		android:paddingBottom="12dip"
+		android:textColor="#FFFFFFFF"
+		android:background="#FF234C59" />
+	<ImageView
+		android:id="@+id/check_detail_separator"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:scaleType="fitXY"
+		android:layout_below="@id/check_detail_name"
+		android:src="@drawable/drop_shadow" />
+	<ScrollView
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_below="@id/check_detail_name" >
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:padding="16dip"
+			android:orientation="vertical" >
+			<TextView
+				android:id="@+id/check_detail_current_label"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:textStyle="bold"
+				android:textColor="#FF151515"
+				 />
+			<View
+				android:layout_width="fill_parent"
+				android:layout_height=".5dip"
+				android:background="#FFA5A5A5" />
+			<TextView
+				android:id="@+id/check_detail_current_state"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textColor="#FF454545" />
+
+			<TextView
+				android:id="@+id/check_detail_previous_label"
+				android:paddingTop="16dip"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:textStyle="bold"
+				android:textColor="#FF151515" />
+			<View
+				android:layout_width="fill_parent"
+				android:layout_height=".5dip"
+				android:background="#FFA5A5A5" />
+			<TextView
+				android:id="@+id/check_detail_previous_state"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textColor="#FF454545" />
+		</LinearLayout>
+	</ScrollView>
+</RelativeLayout>

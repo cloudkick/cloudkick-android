@@ -138,7 +138,6 @@ public class CloudkickAPI {
 	@SuppressWarnings("unchecked")
 	public ArrayList<Check> getChecks(String nodeId) throws BadCredentialsException, OAuthException, IOException, JSONException {
 		String body = doRequest("/query/check?node=" + nodeId + "&with_states=1");
-		Log.i(TAG, "Body: " + body);
 		ArrayList<Check> checks = new ArrayList<Check>();
 		JSONArray rawNodesChecks = new JSONArray(body);
 		int rawSetCount = rawNodesChecks.length();

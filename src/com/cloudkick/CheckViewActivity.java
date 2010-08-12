@@ -78,6 +78,7 @@ public class CheckViewActivity extends Activity {
 
 		setTitle(nodeName + ": " + check.type + " check");
 		redrawCheck();
+		reloadAPI();
 	}
 
 	@Override
@@ -158,6 +159,7 @@ public class CheckViewActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(ArrayList<Check> retrievedChecks) {
+			Log.i(TAG, "Check Data Retrieved");
 			// Handle error
 			if (e != null) {
 				if (e instanceof InvalidCredentialsException) {
@@ -176,6 +178,12 @@ public class CheckViewActivity extends Activity {
 			}
 			// Handle success
 			else if (isRunning) {
+				for (Check check: retrievedChecks) {
+					if (check.id.equals(checkId));
+					CheckViewActivity.this.check = check;
+					Log.i(TAG, "Retrieved Check: " + checkId);
+					break;
+				}
 				redrawCheck();
 				// Schedule the next run
 				reloadHandler.postDelayed(checkReloadService, checkRefreshRate * 1000);
@@ -201,6 +209,7 @@ public class CheckViewActivity extends Activity {
 	private final Runnable checkReloadService = new Runnable() {
 		public void run() {
 			if (api != null) {
+				Log.i(TAG, "Reloading Check Data...");
 				new CheckUpdater().execute();
 			}
 		}

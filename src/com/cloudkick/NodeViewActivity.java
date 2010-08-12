@@ -57,7 +57,7 @@ public class NodeViewActivity extends Activity {
 	private static boolean isRunning;
 	private final Handler reloadHandler = new Handler();
 	private final int nodeRefreshRate = 60;
-	private final int checkRefreshRate = 30;
+	private final int checkRefreshRate = 45;
 	private CheckAdapter adapter;
 	private ArrayList<CKListItem> checks;
 

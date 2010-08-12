@@ -44,7 +44,7 @@ public class CheckViewActivity extends Activity {
 	private boolean isRunning = false;
 	private final Handler reloadHandler = new Handler();
 	private CloudkickAPI api = null;
-	private final int checkRefreshRate = 30;
+	private final int checkRefreshRate = 45;
 	private RelativeLayout checkView;
 	private String nodeName;
 	private String nodeId;
@@ -179,10 +179,11 @@ public class CheckViewActivity extends Activity {
 			// Handle success
 			else if (isRunning) {
 				for (Check check: retrievedChecks) {
-					if (check.id.equals(checkId));
-					CheckViewActivity.this.check = check;
-					Log.i(TAG, "Retrieved Check: " + checkId);
-					break;
+					if (check.id.equals(checkId)) {;
+						CheckViewActivity.this.check = check;
+						Log.i(TAG, "Retrieved Check: " + checkId);
+						break;
+					}
 				}
 				redrawCheck();
 				// Schedule the next run

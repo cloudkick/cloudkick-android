@@ -122,7 +122,7 @@ public class CheckViewActivity extends Activity {
 
 	private void redrawCheck() {
 		((TextView) findViewById(R.id.check_detail_name))
-			.setText(nodeName + " " + check.label + " Check");
+			.setText(nodeName + " " + check.type + " Check");
 
 		((TextView) findViewById(R.id.check_detail_current_label))
 			.setText("Latest State (" + check.latestState.whence + ")");

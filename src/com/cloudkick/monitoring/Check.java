@@ -35,12 +35,8 @@ public class Check extends CKListItem implements Comparable<CKListItem> {
 	public final CheckState previousState;
 	public final CheckState latestState;
 	public final String type;
-	public final String label;
-	public final String longLabel;
 	public final String summary;
 	public final String id;
-	public final String qualifierLabel;
-	public final String qualifierValue;
 
 	public Check(JSONObject rawCheck) throws JSONException {
 		previousState = new CheckState(rawCheck.getJSONObject("previous_state"));
@@ -48,35 +44,6 @@ public class Check extends CKListItem implements Comparable<CKListItem> {
 		type = rawCheck.getString("type");
 		summary = rawCheck.getString("summary");
 		id = rawCheck.getString("id");
-
-		// These are currently the same but might not stay that way
-		label = type;
-		if (type.equals("PLUGIN")) {
-			String pluginName = rawCheck.getJSONObject("details").getString("check");
-			longLabel = String.format("%s (%s)", label, pluginName);
-			qualifierLabel = "Plugin Name";
-			qualifierValue = pluginName;
-		}
-		else if (type.equals("HTTP") || type.equals("HTTPS")) {
-			String url = rawCheck.getJSONObject("details").getString("url");
-			longLabel = String.format("%s (%s)", label, url);
-			qualifierLabel = "URL";
-			qualifierValue = url;
-		}
-		else if (type.equals("DISK")) {
-			String path = rawCheck.getJSONObject("details").getString("path");
-			if (path.equals("")) {
-				path = "/";
-			}
-			longLabel = String.format("%s (%s)", label, path);
-			qualifierLabel = "Path";
-			qualifierValue = path;
-		}
-		else {
-			longLabel = label;
-			qualifierLabel = null;
-			qualifierValue = null;
-		}
 	}
 
 	@Override

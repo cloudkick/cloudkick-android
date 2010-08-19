@@ -49,7 +49,10 @@ public class CheckState implements Serializable {
 				Time now = new Time();
 				now.setToNow();
 				long diffMillis = ((now.toMillis(true)) - whenceMillis);
-				if (diffMillis < 3600*1000) {
+				if (whenceMillis == 0) {
+					whence = "never";
+				}
+				else if (diffMillis < 3600*1000) {
 					whence = String.format("%d m", diffMillis/(1000*60));
 				}
 				else if (diffMillis < (24*3600*1000)) {

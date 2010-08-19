@@ -20,32 +20,37 @@
 	android:layout_height="wrap_content"
 	android:paddingLeft="16dip"
 	android:paddingRight="16dip"
-	android:paddingTop="5dip"
-	android:paddingBottom="5dip">
-	<TextView
-		android:id="@+id/detail_symbol"
-		android:layout_width="wrap_content"
+	android:paddingTop="3dip"
+	android:paddingBottom="9dip">
+	<RelativeLayout
+		android:id="@+id/detail_header"
 		android:layout_height="wrap_content"
-		android:textStyle="bold"
-		android:textSize="20dip"
-		android:gravity="right"
-		android:layout_alignParentRight="true" />
-	<TextView
-		android:id="@+id/detail_label"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_toLeftOf="@id/detail_symbol"
-		android:layout_alignBottom="@id/detail_symbol"
-		android:gravity="left"
-		android:layout_alignParentLeft="true"
-		android:textStyle="bold"
-		android:textSize="16sp"
-		android:textColor="#FF151515"/>
+		android:layout_width="fill_parent" >
+		<TextView
+			android:id="@+id/detail_symbol"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textStyle="bold"
+			android:textSize="20dip"
+			android:gravity="right"
+			android:layout_alignParentRight="true" />
+		<TextView
+			android:id="@+id/detail_label"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_toLeftOf="@id/detail_symbol"
+			android:layout_alignBottom="@id/detail_symbol"
+			android:layout_alignParentLeft="true"
+			android:textStyle="bold"
+			android:textSize="16sp"
+			android:singleLine="true"
+			android:textColor="#FF151515" />
+	</RelativeLayout>
 	<TextView
 		android:id="@+id/detail_value"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/detail_label"
+		android:layout_below="@id/detail_header"
 		android:gravity="center_vertical"
 		android:textColor="#FF151515"/>
 </RelativeLayout>

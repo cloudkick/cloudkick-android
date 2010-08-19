@@ -141,6 +141,9 @@ public class CheckViewActivity extends Activity {
 			.setTextColor(check.previousState.stateColor);
 		((TextView) findViewById(R.id.check_detail_previous_state))
 			.setText(check.previousState.status);
+
+		((TextView) findViewById(R.id.check_detail_summary_value))
+			.setText(check.summary);
 	}
 
 	private class CheckUpdater extends AsyncTask<Void, Void, ArrayList<Check>> {

@@ -27,11 +27,15 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -91,6 +95,32 @@ public class NodeViewActivity extends Activity {
 		setTitle("Node: " + node.name);
 		((ImageView) findViewById(R.id.node_detail_separator)).bringToFront();
 		reloadAPI();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.node_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.do_connectbot:
+				String uri = "ssh://root@" + node.ipAddress + ":22/#root";
+				Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+				try {
+					startActivity(i);
+				}
+				catch(Exception e) {
+					Toast.makeText(this, "Unable to SSH to Host", Toast.LENGTH_LONG);
+				}
+				return true;
+			default:
+				// If its not recognized, do nothing
+				return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override

@@ -1,0 +1,8 @@
+This directory contains Third Party code and libraries used by Cloudkick for Android
+
+Please keep it up to date, and in alphabetical order.
+
+oauth-signpost 1.2.1.1 (March 21, 2010)
+  http://code.google.com/p/oauth-signpost/
+  License: Apache 2.0
+  OAuth message signing library

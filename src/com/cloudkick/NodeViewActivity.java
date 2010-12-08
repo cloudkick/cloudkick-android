@@ -23,8 +23,11 @@ import java.util.Collections;
 import org.apache.http.auth.InvalidCredentialsException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -113,8 +116,28 @@ public class NodeViewActivity extends Activity {
 				try {
 					startActivity(i);
 				}
-				catch(Exception e) {
-					Toast.makeText(this, "Unable to SSH to Host", Toast.LENGTH_LONG);
+				catch (ActivityNotFoundException e) {
+					// Suggest ConnectBot
+					AlertDialog.Builder builder = new AlertDialog.Builder(this);
+					builder.setTitle("SSH Client Not Found");
+					String mfaMessage = ("The ConnectBot SSH Client is required to complete this operation. "
+										+ "Would you like to install ConnectBot from the Android Market now?");
+					builder.setMessage(mfaMessage);
+					builder.setCancelable(true);
+					builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							Intent marketActivity = new Intent(Intent.ACTION_VIEW);
+							marketActivity.setData(Uri.parse("market://details?id=org.connectbot"));
+							startActivity(marketActivity);
+						}
+					});
+					builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});
+					AlertDialog mfaDialog = builder.create();
+					mfaDialog.show();
 				}
 				return true;
 			default:

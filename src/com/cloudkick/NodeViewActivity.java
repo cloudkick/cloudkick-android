@@ -29,11 +29,13 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -111,7 +113,10 @@ public class NodeViewActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.do_connectbot:
-				String uri = "ssh://root@" + node.ipAddress + ":22/#root";
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+				String user = prefs.getString("sshUser", "root");
+				Integer port = new Integer(prefs.getString("sshPort", "22"));
+				String uri = "ssh://" + user + "@" + node.ipAddress + ":" + port + "/#" + user;
 				Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 				try {
 					startActivity(i);

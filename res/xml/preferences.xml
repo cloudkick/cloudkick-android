@@ -28,4 +28,18 @@
 			android:title="OAuth Secret"
 			android:key="editSecret" />
 	</PreferenceCategory>
+	<PreferenceCategory android:title="SSH">
+		<EditTextPreference
+			android:name="User Name"
+			android:summary="The user name to use with SSH"
+			android:title="User Name"
+			android:key="sshUser"
+			android:defaultValue="root" />
+		<EditTextPreference
+			android:name="Port"
+			android:summary="The port to SSH to"
+			android:title="Port"
+			android:numeric="integer"
+			android:defaultValue="22" />
+	</PreferenceCategory>
 </PreferenceScreen>
